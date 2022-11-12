@@ -536,7 +536,7 @@ router.post("/filter/v2/defaults", async (req, resp) => {
         if (err) throw err;
         //console.log("* Output rows - " + JSON.stringify(result.length));
         console.log("* Output - " + JSON.stringify(result));
-        let output = JSON.parse(JSON.stringify(defaultsv2));
+        let output = JSON.parse(JSON.stringify(result));
         output.counts = result.map(transformCount_Mongo);
         resp.status(200).send(output);
       });
@@ -749,7 +749,7 @@ router.post("/v2/filter", async (req, resp) => {
       ]).toArray((err, result) => {
         if (err) throw err;
         //console.log("* Output - " + JSON.stringify(result));
-        let output = JSON.parse(JSON.stringify(defaultsv2));
+        let output = JSON.parse(JSON.stringify(result));
         output.counts = result.map(transformCount_Mongo);
         resp.status(200).send(output);
       });
