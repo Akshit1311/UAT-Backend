@@ -868,7 +868,7 @@ router.get("/startupCount/:geoType/:geoIdType/:geoIdValue/:entityType/:from/:to"
   let searchObj = {};
 
   if (moment(req.params.from, "YYYY-MM-DD", true).isValid() && moment(req.params.to, "YYYY-MM-DD", true).isValid()) {
-    searchObj.profileRegisteredOn = { '$lte': new Date(req.params.to), '$gte': new Date(req.params.from) };
+    searchObj.profileRegisteredOn = { '$lte': (req.params.to), '$gte': (req.params.from) };
   } else {
     resp.status(500).json({ message: 'Invalid Date Format, expected in YYYY-MM-DD' });
   }
