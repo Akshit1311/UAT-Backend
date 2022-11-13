@@ -389,10 +389,10 @@ router.post(
 
     let subQuery = {};
     subQuery.profileRegisteredOn = {
-      "$lte": new Date(req.params.to),
-      "$gte": new Date(req.params.from),
+      "$lte": (req.params.to),
+      "$gte": (req.params.from),
     };
-
+// resp.send(JSON.stringify(req.params));
     var result = [];
     if (req.params.geographicalEntity == "country") {
       // Country - India level
@@ -462,7 +462,7 @@ router.post(
       let stateId = req.params.entityId;
 
       let stateCounts = await populateMultiFieldCountsForStateV3(stateId, req.params.from, req.params.to, req.body);
-
+      // resp.send(JSON.stringify(stateCounts));
       let map = new Map();
       // items = districts
       let items = Object.keys(stateCounts);
@@ -1180,46 +1180,46 @@ async function populateMultiFieldCountsForStateV2(stateId, from, to) {
 }
 
 async function populateMultiFieldCountsForStateV3(stateId, from, to, body) {
-  let startupQ = { "role": { "$eq": 'Startup' }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": new Date(to), "$gte": new Date(from), } };
+  let startupQ = { "role": { "$eq": 'Startup' }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
   startupQ = addAdditionalMatchConditions(startupQ, body);
 
-  let investorQ = { "role": { "$eq": 'Investor' }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": new Date(to), "$gte": new Date(from), } };
+  let investorQ = { "role": { "$eq": 'Investor' }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
   investorQ = addAdditionalMatchConditions(investorQ, body);
 
-  let acceleratorQ = { "role": { "$eq": 'Accelerator' }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": new Date(to), "$gte": new Date(from), } };
+  let acceleratorQ = { "role": { "$eq": 'Accelerator' }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
   acceleratorQ = addAdditionalMatchConditions(acceleratorQ, body);
 
-  let individualQ = { "role": { "$eq": 'Individual' }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": new Date(to), "$gte": new Date(from), } };
+  let individualQ = { "role": { "$eq": 'Individual' }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
   individualQ = addAdditionalMatchConditions(individualQ, body);
 
-  let mentorQ = { "role": { "$eq": 'Mentor' }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": new Date(to), "$gte": new Date(from), } };
+  let mentorQ = { "role": { "$eq": 'Mentor' }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
   mentorQ = addAdditionalMatchConditions(mentorQ, body);
 
-  let govBodyQ = { "role": { "$eq": 'GovernmentBody' }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": new Date(to), "$gte": new Date(from), } };
+  let govBodyQ = { "role": { "$eq": 'GovernmentBody' }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
   govBodyQ = addAdditionalMatchConditions(govBodyQ, body);
 
-  let incubatorQ = { "role": { "$eq": 'Incubator' }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": new Date(to), "$gte": new Date(from), } };
+  let incubatorQ = { "role": { "$eq": 'Incubator' }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
   incubatorQ = addAdditionalMatchConditions(incubatorQ, body);
 
-  let womenOwnedQ = { "womenOwned": { "$eq": true }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": new Date(to), "$gte": new Date(from), } };
+  let womenOwnedQ = { "womenOwned": { "$eq": true }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
   womenOwnedQ = addAdditionalMatchConditions(womenOwnedQ, body);
 
-  let seedFundedQ = { "seedFunded": { "$eq": true }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": new Date(to), "$gte": new Date(from), } };
+  let seedFundedQ = { "seedFunded": { "$eq": true }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
   seedFundedQ = addAdditionalMatchConditions(seedFundedQ, body);
 
-  let taxExemptedQ = { "taxExempted": { "$eq": true }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": new Date(to), "$gte": new Date(from), } };
+  let taxExemptedQ = { "taxExempted": { "$eq": true }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
   taxExemptedQ = addAdditionalMatchConditions(taxExemptedQ, body);
 
-  let dpiitCertifiedQ = { "dpiitCertified": { "$eq": true }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": new Date(to), "$gte": new Date(from), } };
+  let dpiitCertifiedQ = { "dpiitCertified": { "$eq": true }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
   dpiitCertifiedQ = addAdditionalMatchConditions(dpiitCertifiedQ, body);
 
-  let ffsQ = { "fundOfFunds": { "$eq": true }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": new Date(to), "$gte": new Date(from), } };
+  let ffsQ = { "fundOfFunds": { "$eq": true }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
   ffsQ = addAdditionalMatchConditions(ffsQ, body);
 
-  let showcasedQ = { "showcased": { "$eq": true }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": new Date(to), "$gte": new Date(from), } };
+  let showcasedQ = { "showcased": { "$eq": true }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
   showcasedQ = addAdditionalMatchConditions(showcasedQ, body);
 
-  let patentedQ = { "patented": { "$eq": true }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": new Date(to), "$gte": new Date(from), } };
+  let patentedQ = { "patented": { "$eq": true }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
   patentedQ = addAdditionalMatchConditions(patentedQ, body);
 
   let query = [
