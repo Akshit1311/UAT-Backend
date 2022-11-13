@@ -669,7 +669,7 @@ router.post("/v2/filter", async (req, resp) => {
         }
     } */
   console.log("Filter request - " + JSON.stringify(req.body));
-
+  // resp.send(JSON.stringify(req.body));
   if ((!req.body.hasOwnProperty('registrationFrom') && !req.body.hasOwnProperty('registrationTo')) ||
     (_.isEmpty(req.body.registrationFrom) && _.isEmpty(req.body.registrationTo)) ||
     moment(req.body.registrationTo, "YYYY-MM-DD", true).isValid() && moment(req.body.registrationFrom, "YYYY-MM-DD", true).isValid()) {
@@ -681,8 +681,8 @@ router.post("/v2/filter", async (req, resp) => {
   let subQuery = {};
   if ((!_.isEmpty(req.body.registrationFrom) && !_.isEmpty(req.body.registrationTo))) {
     subQuery.profileRegisteredOn = {
-      "$lte": new Date(req.body.registrationTo),
-      "$gte": new Date(req.body.registrationFrom),
+      "$lte": (req.body.registrationTo),
+      "$gte": (req.body.registrationFrom),
     };
   }
 
