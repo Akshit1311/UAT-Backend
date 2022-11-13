@@ -211,6 +211,7 @@ router.post("/filter", (req, resp) => {
   query.stages = req.body.stages;
   query.badges = req.body.badges;
   query.roles = req.body.roles;
+  query.page = req.body.page;
 
   var options = {
     method: "POST",
