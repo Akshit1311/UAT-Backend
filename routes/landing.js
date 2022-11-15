@@ -34,7 +34,7 @@ const startupTypeKeywordMap = {
   "9": "declaredRewards"
 }
 //Get top numbers
-router.get("/topNumbers", async (req, resp) => {
+router.get("/topNumbers", (req, resp) => {
   //This Api returns count of Startups, Mentors, Incubators, Investors, Accelerators and Government sectors for whole country
   //If passed stateId then the counts are for a particular state
   //If passed district id then the counts are for a particular district
@@ -162,7 +162,7 @@ router.get("/topNumbers", async (req, resp) => {
 
 });
 
-router.get("/rightNumbers", async (req, resp) => {
+router.get("/rightNumbers", (req, resp) => {
   //This Api returns count of Startups based on their types for whole country
   //If passed stateId then the counts are for a particular state
   //If passed district id then the counts are for a particular district
