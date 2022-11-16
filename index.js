@@ -65,6 +65,9 @@ const jobsRouter = require("./routes/jobs");
 const { request } = require("http");
 app.use("/maps/jobs", jobsRouter);
 
+const homeRouter = require("./routes/home");
+app.use("/maps/home", homeRouter);
+
 // Starting the server
 https.createServer(options, app).listen(8443, () => {
   console.log("listening on port 8443");
