@@ -6,7 +6,10 @@ const moment = require("moment");
 const _ = require('lodash');
 const { map } = require("lodash");
 
-
+//test route
+router.get("/testHome", async (req, resp) => {
+    resp.send("Test Successful");
+});
 //Get top numbers
 router.get("/topNumbers", async (req, resp) => {
   //This Api returns count of Startups, Mentors, Incubators, Investors, Accelerators and Government sectors for whole country
