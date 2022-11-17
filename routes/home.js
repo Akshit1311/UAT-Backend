@@ -31,8 +31,6 @@ router.post("/topNumbers", async (req, resp) => {
       resp.status(500).json({ message: 'Invalid Date Format, expected in YYYY-MM-DD' });
     }
   }
- 
-  acceptedParams.push("countryId");
   
   if (!_.isEmpty(req.body.stateId)) {
     acceptedParams.push("stateId");
@@ -70,7 +68,6 @@ router.post("/topNumbers", async (req, resp) => {
   //Building default query set for building final queries based on input parameters
   const obj = {
     profileRegisteredOn: { "profileRegisteredOn": { "$gte": req.body.from, "$lte": req.body.to } },
-    countryId: { "countryId": "5f02e38c6f3de87babe20cd2" },
     stateId: { "stateId": req.body.stateId },
     districtId: { "districtId": req.body.districtId },
     industries: { "industry._id": { $in: industries } },
@@ -78,44 +75,32 @@ router.post("/topNumbers", async (req, resp) => {
     badges: { "badges": { "$exists": true, "$type": 'array', "$ne": [] } }
   }
 
-
   const matchQueryArr = Object.keys(obj).filter(key => acceptedParams.includes(key)).map(key => obj[key])
-  
-  console.log({ matchQueryArr });
-  // console.log({result: array[1]["industry._id"]});
-
-  // resp.send(match);
   const facetArr = ["Startup", "Investor", "Accelerator", "Mentor", "GovernmentBody", "Incubator"];
+  
   let facetMap = new Map();
   facetArr.forEach(e =>
     facetMap.set(e, [{ "$match": { "role": { "$eq": e }, } }, { "$count": e }])
   );
   let facetQuery = Object.fromEntries(facetMap);
 
-  console.log({ facetQuery });
-
   let projectMap = new Map();
   facetArr.forEach(e =>
     projectMap.set(e, { "$arrayElemAt": [`$${e}.${e}`, 0] })
-
   );
-  // resp.send(Object.fromEntries(projectMap));
+;
   let projectQuery = Object.fromEntries(projectMap);
+ 
+  let query = [];
+  //If any selection criteria then add it here
+  if (matchQueryArr.length) {
+      query.push({"$match": {"$and": matchQueryArr}
+      });
 
-  let query = [
-    {
-      "$match": {
-        "$and": matchQueryArr
-      }
-    },
-    {
-      "$facet": facetQuery
-    },
-    {
-      "$project": projectQuery
-    }
-  ];
-  // resp.send(JSON.stringify(query));
+  };
+  query.push({"$facet": facetQuery});
+  query.push({"$project": projectQuery});
+
   var promAll = new Promise((resolve, rej) => {
     try {
       mongodb
@@ -141,7 +126,7 @@ router.post("/topNumbers", async (req, resp) => {
     });
 
 });
-// //Get top numbers
+//Get top numbers
 // router.get("/topNumbers", async (req, resp) => {
 //   //This Api returns count of Startups, Mentors, Incubators, Investors, Accelerators and Government sectors for whole country
 //   //If passed stateId then the counts are for a particular state
@@ -161,8 +146,6 @@ router.post("/topNumbers", async (req, resp) => {
 //       resp.status(500).json({ message: 'Invalid Date Format, expected in YYYY-MM-DD' });
 //     }
 //   }
-
-//   acceptedParams.push("countryId");
 
 //   if (!_.isEmpty(req.query.stateId)) {
 //     acceptedParams.push("stateId");
@@ -293,8 +276,6 @@ router.get("/startupCounts", async (req, resp) => {
     }
   }
 
-  // acceptedParams.push("countryId");
-
   if (!_.isEmpty(req.query.stateId)) {
     acceptedParams.push("stateId");
   }
@@ -333,7 +314,6 @@ router.get("/startupCounts", async (req, resp) => {
   const obj = {
     role: { "role": { "$eq": "Startup" } },
     profileRegisteredOn: { "profileRegisteredOn": { "$gte": req.query.from, "$lte": req.query.to } },
-    // countryId: { "countryId": "5f02e38c6f3de87babe20cd2" },
     stateId: { "stateId": req.query.stateId },
     districtId: { "districtId": req.query.districtId },
     industries: { "industry._id": { $in: industries } },
@@ -343,43 +323,30 @@ router.get("/startupCounts", async (req, resp) => {
 
 
   const matchQueryArr = Object.keys(obj).filter(key => acceptedParams.includes(key)).map(key => obj[key])
-
-  console.log({ matchQueryArr });
-  // console.log({result: array[1]["industry._id"]});
-
-  // resp.send(match);
   const facetArr = ["dpiitCertified", "showcased","seedFunded","fundOfFunds",
   "seedFunded","patented","womenOwned", "leadingSector", "declaredRewards"];
+
   let facetMap = new Map();
   facetArr.forEach(e =>
     facetMap.set(e, [{ "$match": { [e]: { "$eq": "1" }, } }, { "$count": e }])
   );
+
   let facetQuery = Object.fromEntries(facetMap);
-
-  // resp.send({ facetQuery });
-
   let projectMap = new Map();
   facetArr.forEach(e =>
     projectMap.set(e, { "$arrayElemAt": [`$${e}.${e}`, 0] })
 
   );
-  // resp.send(Object.fromEntries(projectMap));
+ 
   let projectQuery = Object.fromEntries(projectMap);
 
-  let query = [
-    {
-      "$match": {
-        "$and": matchQueryArr
-      }
-    },
-    {
-      "$facet": facetQuery
-    },
-    {
-      "$project": projectQuery
-    }
-  ];
-  // resp.send(JSON.stringify(query));
+  if (matchQueryArr.length) {
+    query.push({"$match": {"$and": matchQueryArr}
+    });
+   };
+  query.push({"$facet": facetQuery});
+  query.push({"$project": projectQuery});
+
   var promAll = new Promise((resolve, rej) => {
     try {
       mongodb
