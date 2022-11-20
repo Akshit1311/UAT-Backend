@@ -2,14 +2,17 @@ const express = require("express");
 const router = express.Router();
 const request = require("request");
 const mongodb = require("../mongodb");
+const _ = require('lodash');
 
 router.get("/industryInsights", async (req, resp) => {
   //This Api returns insights i.e. industry wise counts and their percentages
-
-  let totalCount = await getTotalCount();
-  // console.log(` TotalCount = ${totalCount}`);
-  let industryWiseCounts = await getIndustryWiseCounts();
-  // console.log(industryWiseCounts)
+  let stateId='';
+  if (!_.isEmpty(req.query.stateId)) {
+    stateId=req.query.stateId;
+  }
+  let totalCount = await getTotalCount(stateId);
+  let industryWiseCounts = await getIndustryWiseCounts(stateId);
+ 
   let output=[];
   industryWiseCounts.forEach(e => {
       let percentage = (totalCount)? (e.count*100/totalCount).toFixed(2):0;
@@ -20,12 +23,12 @@ router.get("/industryInsights", async (req, resp) => {
 
 //Get Sector insights
 router.get("/sectorInsights", async (req, resp) => {
-  //This Api returns insights i.e. sector wise counts and their percentages
-
-  let totalSectorCount = await getTotalSectorCount();
-  // console.log(` TotalSectorCount = ${totalSectorCount}`);
-  let sectorWiseCounts = await getSectorWiseCounts();
-  // console.log(sectorWiseCounts)
+  let stateId='';
+  if (!_.isEmpty(req.query.stateId)) {
+    stateId=req.query.stateId;
+  }
+  let totalSectorCount = await getTotalSectorCount(stateId);
+  let sectorWiseCounts = await getSectorWiseCounts(stateId);
   let output=[];
   sectorWiseCounts.forEach(e => {
       let percentage = (totalSectorCount)? (e.count*100/totalSectorCount).toFixed(2):0;
@@ -38,10 +41,13 @@ router.get("/sectorInsights", async (req, resp) => {
 router.get("/stageInsights", async (req, resp) => {
   //This Api returns insights i.e. sector wise counts and their percentages
 
-  let totalStageCount = await getTotalStageCount();
-  // console.log(` TotalStageCount = ${totalStageCount}`);
-  let stageWiseCounts = await getStageWiseCounts();
-  // console.log(stageWiseCounts)
+  if (!_.isEmpty(req.query.stateId)) {
+    stateId=req.query.stateId;
+  }
+
+  let totalStageCount = await getTotalStageCount(stateId);
+  let stageWiseCounts = await getStageWiseCounts(stateId);
+
   let output=[];
   stageWiseCounts.forEach(e => {
       let percentage = (totalStageCount)? (e.count*100/totalStageCount).toFixed(2):0;
@@ -52,11 +58,14 @@ router.get("/stageInsights", async (req, resp) => {
   
   
 
-async function getTotalCount() {
-
+async function getTotalCount(stateId='') {
+  let matchQuery = { "industry.name": { "$ne": "" }, }
+  if (stateId!=''){
+    matchQuery={  "stateId": { "$eq": stateId }, "industry.name": { "$ne": "" }, }
+  }
   const queryTotalIndCount = [
     { $unwind:  { path: "$industry" } },
-     { "$match": { "industry.name": { "$ne": "" }, } },
+     { "$match": matchQuery },
     { $group:   { _id: null,  count: { $sum:1 } } }
   ] ;
 
@@ -69,7 +78,6 @@ async function getTotalCount() {
           if (err) throw err;
           let output = await result[0];
           resolve(output);
-          // console.log(output);
         });
     } catch (err) {
       console.error('toNumbers :: ' + err.message);
@@ -86,11 +94,15 @@ async function getTotalCount() {
 
 };
 
-async function getTotalSectorCount() {
+async function getTotalSectorCount(stateId='') {
 
+  let matchQuery = { "sector.name": { "$ne": "" }, }
+  if (stateId!=''){
+    matchQuery={  "stateId": { "$eq": stateId },  "sector.name": { "$ne": "" }, }
+  }
   const queryTotalSectorCount = [
     { $unwind:  { path: "$sector" } },
-     { "$match": { "sector.name": { "$ne": "" }, } },
+     { "$match": matchQuery },
     { $group:   { _id: null,  count: { $sum:1 } } }
   ] ;
 
@@ -103,7 +115,6 @@ async function getTotalSectorCount() {
           if (err) throw err;
           let output = await result[0];
           resolve(output);
-          // console.log(output);
         });
     } catch (err) {
       console.error('toNumbers :: ' + err.message);
@@ -120,10 +131,14 @@ async function getTotalSectorCount() {
 
 };
 
-async function getTotalStageCount() {
-
+async function getTotalStageCount(stateId='') {
+   console.log(`state=${stateId}`);
+  let matchQuery = { "stage": { "$ne": "" }, }
+  if (stateId!=''){
+    matchQuery={  "stateId": { "$eq": stateId },  "stage": { "$ne": "" }, }
+  }
   const queryTotalStageCount = [
-     { "$match": { "stage": { "$ne": "" }, } },
+     { "$match": matchQuery },
     { $group:   { _id: null,  count: { $sum:1 } } }
   ] ;
 
@@ -136,7 +151,6 @@ async function getTotalStageCount() {
           if (err) throw err;
           let output = await result[0];
           resolve(output);
-          // console.log(output);
         });
     } catch (err) {
       console.error('toNumbers :: ' + err.message);
@@ -155,11 +169,14 @@ async function getTotalStageCount() {
 
 
 
-async function getIndustryWiseCounts() {
-
+async function getIndustryWiseCounts(stateId='') {
+  let matchQuery ={ "industry.name": { "$ne": "" }, } 
+  if (stateId!=''){
+    matchQuery={  "stateId": { "$eq": stateId },  "industry.name": { "$ne": "" }, }
+  }
   const queryIndwiseCount = [
     { $unwind:  { path: "$industry" } },
-     { "$match": { "industry.name": { "$ne": "" }, } },
+     { "$match": matchQuery },
     { $group:   {  _id: "$industry.name", count: { $sum:1 } } },
     { $sort:    { "_id":1 } }
   ];
@@ -191,11 +208,15 @@ async function getIndustryWiseCounts() {
 }
 
 
-async function getSectorWiseCounts() {
+async function getSectorWiseCounts(stateId='') {
 
+  let matchQuery ={$and:[{"role":'Startup'},{ "sector.name": { "$ne": "" }, }] }
+  if (stateId!=''){
+    matchQuery={ $and:[{"stateId": { "$eq": stateId }},{"role":'Startup'},{ "sector.name": { "$ne": "" }},]  }
+  }
   const querySectorwiseCount = [
     { $unwind:  { path: "$sector" } },
-    { "$match": {$and:[{"role":'Startup'},{ "sector.name": { "$ne": "" }, }] }},
+    { "$match": matchQuery },
     { $group:   {  _id: "$sector.name", count: { $sum:1 } } },
     // { $sort:    { "_id":1 } }
   ];
@@ -226,10 +247,15 @@ async function getSectorWiseCounts() {
 
 }
 
-async function getStageWiseCounts() {
+async function getStageWiseCounts(stateId='') {
 
+  
+  let matchQuery ={$and:[{"role":'Startup'},{ "stage": { "$ne": "" }, }] }
+  if (stateId!=''){
+    matchQuery={ $and:[{"stateId": { "$eq": stateId }},{"role":'Startup'},{ "stage": { "$ne": "" }},]  }
+  }
   const queryStagewiseCount = [
-    { "$match": {$and:[{ "stage": { "$ne": "" } },{"role":'Startup'}] }},
+    { "$match": matchQuery },
     { $group:   {  _id: "$stage", count: { $sum:1 } } },
     { $sort:    { "_id":1 } }
   ];
