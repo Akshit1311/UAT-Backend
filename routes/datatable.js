@@ -1181,6 +1181,8 @@ async function populateMultiFieldCountsForStateV2(stateId, from, to) {
 }
 
 async function populateMultiFieldCountsForStateV3(stateId, from, to, body) {
+  from = new Date(from);
+	to = new Date(to);
   let startupQ = { "role": { "$eq": 'Startup' }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
   startupQ = addAdditionalMatchConditions(startupQ, body);
 
@@ -1329,6 +1331,8 @@ async function populateMultiFieldCountsForStateV3(stateId, from, to, body) {
 }
 
 async function populateMultiFieldCountsForCountryV3(from, to, body) {
+  from = new Date(from);
+	to = new Date(to);
   let startupQ = { "role": { "$eq": 'Startup' }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
   startupQ = addAdditionalMatchConditions(startupQ, body);
 
