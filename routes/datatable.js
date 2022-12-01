@@ -1481,6 +1481,8 @@ async function populateMultiFieldCountsForCountryV3(from, to, body) {
 }
 
 async function populateMultiFieldCountsForCountry(from, to) {
+  from = new Date(from);
+	to = new Date(to);
   let query = [
     {
       "$facet": {
