@@ -1333,10 +1333,13 @@ async function populateMultiFieldCountsForStateV3(stateId, from, to, body) {
 }
 
 async function populateMultiFieldCountsForCountryV3(from, to, body) {
+ 
   from = new Date(from);
 	to = new Date(to);
   let startupQ = { "role": { "$eq": 'Startup' }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
   startupQ = addAdditionalMatchConditions(startupQ, body);
+  // console.log("start");
+  // console.log(startupQ);
 
   let investorQ = { "role": { "$eq": 'Investor' }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
   investorQ = addAdditionalMatchConditions(investorQ, body);
@@ -1376,7 +1379,7 @@ async function populateMultiFieldCountsForCountryV3(from, to, body) {
 
   let patentedQ = { "patented": { "$eq": true }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
   patentedQ = addAdditionalMatchConditions(patentedQ, body);
-
+ 
   let query = [
     {
       "$facet": {
@@ -1457,6 +1460,8 @@ async function populateMultiFieldCountsForCountryV3(from, to, body) {
       }
     }
   ];
+
+  // console.log(query);
 
   let promAllCV3 = new Promise((resolve, rej) => {
     try {
