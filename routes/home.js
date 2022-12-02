@@ -5,6 +5,7 @@ const mongodb = require("../mongodb");
 const moment = require("moment");
 const _ = require('lodash');
 const { map } = require("lodash");
+const e = require("express");
 
 //Get top numbers POST API
 router.post("/topNumbers", async (req, resp) => {
@@ -16,8 +17,6 @@ router.post("/topNumbers", async (req, resp) => {
   //Array to accept variable parameters e.g. stateId, industries, sectors, from and to dates
   const acceptedParams = [];
   const industries = [];
-  let from = new Date(req.body.from);
-	let to = new Date(req.body.to);
 
   if ((!_.isEmpty(req.body.from)) && (!_.isEmpty(req.body.to))) {
     if (moment(req.body.from, "YYYY-MM-DD", true).isValid() && moment(req.body.to, "YYYY-MM-DD", true).isValid()) {
@@ -64,7 +63,7 @@ router.post("/topNumbers", async (req, resp) => {
   }
   //Building default query set for building final queries based on input parameters
   const obj = {
-    profileRegisteredOn: { "profileRegisteredOn": { "$gte": from, "$lte": to } },
+    profileRegisteredOn: { "profileRegisteredOn": { "$gte": req.body.from, "$lte": req.body.to } },
     stateId: { "stateId": req.body.stateId },
     districtId: { "districtId": req.body.districtId },
     industries: { "industry._id": { $in: industries } },
@@ -132,9 +131,7 @@ router.get("/startupCounts", async (req, resp) => {
   //Array to accept variable parameters e.g. stateId, industries, sectors, from and to dates
   const acceptedParams = ["role"];
   const industries = [];
-  let from = new Date(req.query.from);
-	let to = new Date(req.query.to);
-  // console.log(req.query);
+  console.log(req.query);
   if ((!_.isEmpty(req.query.from)) && (!_.isEmpty(req.query.to))) {
     if (moment(req.query.from, "YYYY-MM-DD", true).isValid() && moment(req.query.to, "YYYY-MM-DD", true).isValid()) {
       acceptedParams.push("profileRegisteredOn");
@@ -182,7 +179,7 @@ router.get("/startupCounts", async (req, resp) => {
   //Building default body set for building final queries based on input parameters
   const obj = {
     role: { "role": { "$eq": "Startup" } },
-    profileRegisteredOn: { "profileRegisteredOn": { "$gte": from, "$lte": to } },
+    profileRegisteredOn: { "profileRegisteredOn": { "$gte": req.query.from, "$lte": req.query.to } },
     stateId: { "stateId": req.query.stateId },
     districtId: { "districtId": req.query.districtId },
     industries: { "industry._id": { $in: industries } },
@@ -198,7 +195,7 @@ router.get("/startupCounts", async (req, resp) => {
   console.log(matchQueryArr);
   let facetMap = new Map();
   facetArr.forEach(e =>
-    facetMap.set(e, [{ "$match": { [e]: { "$eq": true }, } }, { "$count": e }])
+    facetMap.set(e, [{ "$match": { [e]: { "$eq": "1" }, } }, { "$count": e }])
   );
 
   let facetQuery = Object.fromEntries(facetMap);
@@ -243,6 +240,54 @@ router.get("/startupCounts", async (req, resp) => {
     });
 
 });
+
+router.get("/leadingSector", async (req, resp) => {
+
+  let stateId = req.query.stateId;
+  let sectorwiseCounts = await getSectorWiseCounts(stateId);
+  let output= sectorwiseCounts.filter(e=>(e._id!="Others" && e._id!="")); 
+  resp.send(output[0]);
+
+});
+async function getSectorWiseCounts(stateId='') {
+ 
+
+  let matchQuery ={$and:[{"role":'Startup'},] }
+  if (stateId!=''){
+    matchQuery={ $and:[{"stateId": { "$eq": stateId }},{"role":'Startup'},]  }
+  }
+  const querySectorwiseCount = [
+    { $unwind:  { path: "$sector" } },
+    { "$match": matchQuery },
+    { $group:   {  _id: "$sector.name", count: { $sum:1 } } },
+    { $sort:    { "count": -1 } }
+  ];
+
+
+  var prom = new Promise((resolve, rej) => {
+    try {
+      mongodb
+        .getDb()
+        .collection("digitalMapUser")
+        .aggregate(querySectorwiseCount).limit(5).toArray(async (err, result) => {
+          if (err) throw err;
+          let output = await result;
+          resolve(output);
+        });
+    } catch (err) {
+      console.error('toNumbers :: ' + err.message);
+    }
+  });
+  return Promise.all([prom])
+    .then((values) => {
+      //  console.log("All promises resolved - " + JSON.stringify(values));
+      return values[0];
+    })
+    .catch((reason) => {
+      console.log(reason);
+    });
+
+}
 
 
 module.exports = router;
