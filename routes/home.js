@@ -199,7 +199,7 @@ router.get("/startupCounts", async (req, resp) => {
   console.log(matchQueryArr);
   let facetMap = new Map();
   facetArr.forEach(e =>
-    facetMap.set(e, [{ "$match": { [e]: { "$eq": "1" }, } }, { "$count": e }])
+    facetMap.set(e, [{ "$match": { [e]: { "$eq":true }, } }, { "$count": e }])
   );
 
   let facetQuery = Object.fromEntries(facetMap);
