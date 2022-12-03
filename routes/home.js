@@ -17,6 +17,8 @@ router.post("/topNumbers", async (req, resp) => {
   //Array to accept variable parameters e.g. stateId, industries, sectors, from and to dates
   const acceptedParams = [];
   const industries = [];
+  from = new Date(req.body.from);
+  to = new Date(req.body.to);
 
   if ((!_.isEmpty(req.body.from)) && (!_.isEmpty(req.body.to))) {
     if (moment(req.body.from, "YYYY-MM-DD", true).isValid() && moment(req.body.to, "YYYY-MM-DD", true).isValid()) {
@@ -63,7 +65,7 @@ router.post("/topNumbers", async (req, resp) => {
   }
   //Building default query set for building final queries based on input parameters
   const obj = {
-    profileRegisteredOn: { "profileRegisteredOn": { "$gte": req.body.from, "$lte": req.body.to } },
+    profileRegisteredOn: { "profileRegisteredOn": { "$gte": from, "$lte": to } },
     stateId: { "stateId": req.body.stateId },
     districtId: { "districtId": req.body.districtId },
     industries: { "industry._id": { $in: industries } },
@@ -131,6 +133,8 @@ router.get("/startupCounts", async (req, resp) => {
   //Array to accept variable parameters e.g. stateId, industries, sectors, from and to dates
   const acceptedParams = ["role"];
   const industries = [];
+  from = new Date(req.query.from);
+  to = new Date(req.query.to);
   console.log(req.query);
   if ((!_.isEmpty(req.query.from)) && (!_.isEmpty(req.query.to))) {
     if (moment(req.query.from, "YYYY-MM-DD", true).isValid() && moment(req.query.to, "YYYY-MM-DD", true).isValid()) {
@@ -179,7 +183,7 @@ router.get("/startupCounts", async (req, resp) => {
   //Building default body set for building final queries based on input parameters
   const obj = {
     role: { "role": { "$eq": "Startup" } },
-    profileRegisteredOn: { "profileRegisteredOn": { "$gte": req.query.from, "$lte": req.query.to } },
+    profileRegisteredOn: { "profileRegisteredOn": { "$gte": from, "$lte": to } },
     stateId: { "stateId": req.query.stateId },
     districtId: { "districtId": req.query.districtId },
     industries: { "industry._id": { $in: industries } },
