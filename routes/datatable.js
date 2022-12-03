@@ -40,6 +40,26 @@ var dataCountJson = {
   SeedFundStartup: 0,
   ShowcasedStartups: 0,
 };
+
+var dataCountMap = {
+  Startup: 0,
+  Mentor: 0,
+  Incubator: 0,
+  Investor: 0,
+  Accelerator: 0, 
+  GovernmentBody: 0,  
+};
+
+var dataCountOthers = {
+  DpiitCertified  : 0,
+  ShowcasedStartups: 0,
+  SeedFunded: 0,
+  FFS: 0,
+  Patented: 0,
+  WomenLed: 0,
+  LeadingSector: 0,
+  DeclaredRewards:0
+};
 router.get('/test', (req, res)=> { res.json({status: "ok"}) })
 router.get(
   "/statistics/:geographicalEntity/:entityId/:from/:to",
@@ -1183,8 +1203,8 @@ async function populateMultiFieldCountsForStateV2(stateId, from, to) {
 }
 
 async function populateMultiFieldCountsForStateV3(stateId, from, to, body) {
-  from = new Date(from);
-	to = new Date(to);
+  // from = new Date(from);
+	// to = new Date(to);
   let startupQ = { "role": { "$eq": 'Startup' }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
   startupQ = addAdditionalMatchConditions(startupQ, body);
 
@@ -1334,53 +1354,54 @@ async function populateMultiFieldCountsForStateV3(stateId, from, to, body) {
 
 async function populateMultiFieldCountsForCountryV3(from, to, body) {
  
-  from = new Date(from);
-	to = new Date(to);
+  // from = new Date(from);
+	// to = new Date(to);
   let startupQ = { "role": { "$eq": 'Startup' }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
   startupQ = addAdditionalMatchConditions(startupQ, body);
   // console.log("start");
   // console.log(startupQ);
 
-  let investorQ = { "role": { "$eq": 'Investor' }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
+  let investorQ = { "role": { "$eq": 'Investor' } };
   investorQ = addAdditionalMatchConditions(investorQ, body);
 
-  let acceleratorQ = { "role": { "$eq": 'Accelerator' }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
+  let acceleratorQ = { "role": { "$eq": 'Accelerator' } };
   acceleratorQ = addAdditionalMatchConditions(acceleratorQ, body);
 
-  let individualQ = { "role": { "$eq": 'Individual' }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
+  let individualQ = { "role": { "$eq": 'Individual' } };
   individualQ = addAdditionalMatchConditions(individualQ, body);
 
-  let mentorQ = { "role": { "$eq": 'Mentor' }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
+  let mentorQ = { "role": { "$eq": 'Mentor' } };
   mentorQ = addAdditionalMatchConditions(mentorQ, body);
 
-  let govBodyQ = { "role": { "$eq": 'GovernmentBody' }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
+  let govBodyQ = { "role": { "$eq": 'GovernmentBody' } };
   govBodyQ = addAdditionalMatchConditions(govBodyQ, body);
 
-  let incubatorQ = { "role": { "$eq": 'Incubator' }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
+  let incubatorQ = { "role": { "$eq": 'Incubator' } };
   incubatorQ = addAdditionalMatchConditions(incubatorQ, body);
 
-  let womenOwnedQ = { "womenOwned": { "$eq": true }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
+  let womenOwnedQ = { "womenOwned": { "$eq": true } };
   womenOwnedQ = addAdditionalMatchConditions(womenOwnedQ, body);
 
-  let seedFundedQ = { "seedFunded": { "$eq": true }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
+  let seedFundedQ = { "seedFunded": { "$eq": true } };
   seedFundedQ = addAdditionalMatchConditions(seedFundedQ, body);
 
-  let taxExemptedQ = { "taxExempted": { "$eq": true }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
+  let taxExemptedQ = { "taxExempted": { "$eq": true } };
   taxExemptedQ = addAdditionalMatchConditions(taxExemptedQ, body);
 
-  let dpiitCertifiedQ = { "dpiitCertified": { "$eq": true }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
+  let dpiitCertifiedQ = { "dpiitCertified": { "$eq": true } };
   dpiitCertifiedQ = addAdditionalMatchConditions(dpiitCertifiedQ, body);
 
-  let ffsQ = { "fundOfFunds": { "$eq": true }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
+  let ffsQ = { "fundOfFunds": { "$eq": true } };
   ffsQ = addAdditionalMatchConditions(ffsQ, body);
 
-  let showcasedQ = { "showcased": { "$eq": true }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
+  let showcasedQ = { "showcased": { "$eq": true } };
   showcasedQ = addAdditionalMatchConditions(showcasedQ, body);
 
-  let patentedQ = { "patented": { "$eq": true }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
+  let patentedQ = { "patented": { "$eq": true } };
   patentedQ = addAdditionalMatchConditions(patentedQ, body);
  
   let query = [
+    {"$match":{"profileRegisteredOn": { "$lte": (to), "$gte": (from), }}},
     {
       "$facet": {
         "Startup": [
@@ -1636,6 +1657,766 @@ function addAdditionalMatchConditions(subQuery, data) {
 
 function fillUndefined(value) {
   return _.isUndefined(value) ? 0 : value;
+}
+
+
+
+
+router.post(
+  "/stats1/:geographicalEntity/:entityId/:from/:to",
+  async (req, resp) => {
+    // #swagger.tags = ['Data Tables']
+    // #swagger.path = '/data/v2/statis/{geographicalEntity}/{entityId}/{from}/{to}'
+    // #swagger.exmaple = '/data/v2/statis/country/5f02e38c6f3de87babe20cd2/{from}/{to}'
+    // #swagger.description = 'State-wise data table'
+    /*  #swagger.parameters['obj'] = {
+        in: 'body',
+        description: 'Schema for query to filter based on criteria',
+        schema: {
+          "$industries": [],
+          "$sectors": [],
+          "$stages": ["Scaling", "EarlyTraction", "Validation"],
+        }
+    } */
+    // console.log("Data Table request - " + JSON.stringify(req.body));
+
+    var output = {};
+    output.from = req.params.from;
+    output.to = req.params.to;
+
+    if ((!_.isEmpty(req.params.from) && !_.isEmpty(req.params.to)) ||
+      moment(req.params.from, "YYYY-MM-DD", true).isValid() && moment(req.params.to, "YYYY-MM-DD", true).isValid()) {
+      console.log("Valid dates passed.")
+    } else {
+      resp.status(500).json({ message: 'Invalid Date Format, expected in YYYY-MM-DD' });
+    }
+
+    let subQuery = {};
+    subQuery.profileRegisteredOn = {
+      "$lte": new Date (req.params.to),
+      "$gte": new Date (req.params.from),
+    };
+// resp.send(JSON.stringify(req.params));
+    var result = [];
+    if (req.params.geographicalEntity == "country") {
+      // Country - India level
+      let countryCounts = await populateStats1Country(req.params.from, req.params.to, req.body);
+
+      let map = new Map();
+      // items = states
+      let items = Object.keys(countryCounts);
+      for (let i = 0; i < items.length; i++) {
+        let key = items[i];
+        let v = countryCounts[key].length ? countryCounts[key][0] : [];
+       
+        for (let j = 0; j < v.length; j++) {
+          let x = v[j];
+          let c = x.count;
+          x = x._id;
+
+          if (map.has(x.stateId)) {
+            let countData = map.get(x.stateId);
+            countData.statistics[key] = c;
+            map.set(x.stateId, countData);
+          } else {
+            let placeholder = JSON.parse(JSON.stringify(dataCountMap));
+            placeholder[key] = c;
+            let data = {};
+            data.stateId = x.stateId;
+            data.state = x.state;
+            data.statistics = placeholder;
+            map.set(x.stateId, data);
+          }
+        }
+      }
+      let countsArr = [];
+      for (let [key, val] of map.entries()) {
+        let state = {};
+        let count = JSON.parse(JSON.stringify(dataCountMap));
+
+        state.stateId = key;
+        state.id = key;
+        state.state = val.state;
+        state.name = val.state;
+        state.text = val.state;
+       
+        count.Startup = fillUndefined(val.statistics.Startup);
+        count.Mentor = fillUndefined(val.statistics.Mentor);
+        count.Incubator = fillUndefined(val.statistics.Incubator);
+        count.Investor = fillUndefined(val.statistics.Investor);
+        count.Individual = fillUndefined(val.statistics.Individual);
+        count.GovernmentBody = fillUndefined(val.statistics.GovernmentBody);
+        count.Accelerator = fillUndefined(val.statistics.Accelerator);
+
+        state.statistics = count;
+        countsArr.push(state);
+      }
+      output.data = countsArr;
+      resp.status(200).send(output);
+
+    } else if (req.params.geographicalEntity == "state") {
+      // State level
+      let stateId = req.params.entityId;
+      // console.log('stateId =',stateId);
+
+      let stateCounts = await populateStats1State(stateId, req.params.from, req.params.to, req.body);
+      // resp.send(JSON.stringify(stateCounts));
+      let map = new Map();
+      // items = districts
+      let items = Object.keys(stateCounts);
+      for (let i = 0; i < items.length; i++) {
+        let key = items[i];
+        let v = stateCounts[key].length ? stateCounts[key][0] : [];
+        for (let j = 0; j < v.length; j++) {
+          let x = v[j];
+          let c = x.count;
+          x = x._id;
+
+          if (map.has(x.districtId)) {
+            let countData = map.get(x.districtId);
+            countData.statistics[key] = c;
+            map.set(x.districtId, countData);
+          } else {
+            let placeholder = JSON.parse(JSON.stringify(dataCountMap));
+            placeholder[key] = c;
+            let data = {};
+            data.districtId = x.districtId;
+            data.district = x.district;
+            data.stateId = x.stateId;
+            data.state = x.state;
+            data.statistics = placeholder;
+            map.set(x.districtId, data);
+          }
+        }
+      }
+
+      let countsArr = [];
+      for (let [key, val] of map.entries()) {
+        let district = {};
+        let count = JSON.parse(JSON.stringify(dataCountMap));
+
+        district.districtId = key;
+        district.district = val.district;
+        district.stateId = val.stateId;
+        district.state = val.state;
+
+        
+        count.Startup = fillUndefined(val.statistics.Startup);
+        count.Mentor = fillUndefined(val.statistics.Mentor);
+        count.Incubator = fillUndefined(val.statistics.Incubator);
+        count.Investor = fillUndefined(val.statistics.Investor);
+        count.Individual = fillUndefined(val.statistics.Individual);
+        count.GovernmentBody = fillUndefined(val.statistics.GovernmentBody);
+        count.Accelerator = fillUndefined(val.statistics.Accelerator);
+
+        district.statistics = count;
+        countsArr.push(district);
+      }
+      output.data = countsArr;
+      resp.status(200).send(output);
+    } else {
+      // City/District level
+    }
+  }
+);
+
+router.post(
+  "/stats2/:geographicalEntity/:entityId/:from/:to",
+  async (req, resp) => {
+    // #swagger.tags = ['Data Tables']
+    // #swagger.path = '/data/v2/statis/{geographicalEntity}/{entityId}/{from}/{to}'
+    // #swagger.exmaple = '/data/v2/statis/country/5f02e38c6f3de87babe20cd2/{from}/{to}'
+    // #swagger.description = 'State-wise data table'
+    /*  #swagger.parameters['obj'] = {
+        in: 'body',
+        description: 'Schema for query to filter based on criteria',
+        schema: {
+          "$industries": [],
+          "$sectors": [],
+          "$stages": ["Scaling", "EarlyTraction", "Validation"],
+        }
+    } */
+    // console.log("Data Table request - " + JSON.stringify(req.body));
+
+    var output = {};
+    output.from = req.params.from;
+    output.to = req.params.to;
+
+    if ((!_.isEmpty(req.params.from) && !_.isEmpty(req.params.to)) ||
+      moment(req.params.from, "YYYY-MM-DD", true).isValid() && moment(req.params.to, "YYYY-MM-DD", true).isValid()) {
+      console.log("Valid dates passed.")
+    } else {
+      resp.status(500).json({ message: 'Invalid Date Format, expected in YYYY-MM-DD' });
+    }
+
+    let subQuery = {};
+    subQuery.profileRegisteredOn = {
+      "$lte": new Date (req.params.to),
+      "$gte": new Date (req.params.from),
+    };
+// resp.send(JSON.stringify(req.params));
+    var result = [];
+    if (req.params.geographicalEntity == "country") {
+      // Country - India level
+      let countryCounts = await populateStats2Country(req.params.from, req.params.to, req.body);
+      // console.log(countryCounts)
+      let map = new Map();
+      
+      //Get all keys i.e. statistics received
+      let items = Object.keys(countryCounts);
+      // console.log(items)
+  
+      for (let i = 0; i < items.length; i++) {
+        let key = items[i];
+        let v = countryCounts[key].length ? countryCounts[key][0] : [];
+      //  console.log(v)
+        for (let j = 0; j < v.length; j++) {
+          let x = v[j];
+          let c = x.count;
+          x = x._id;
+
+          if (map.has(x.stateId)) {
+            let countData = map.get(x.stateId);
+            countData.statistics[key] = c;
+            map.set(x.stateId, countData);
+           
+          } else {
+            let placeholder = JSON.parse(JSON.stringify(dataCountOthers));
+            placeholder[key] = c;
+            let data = {};
+            data.stateId = x.stateId;
+            data.state = x.state;
+            data.statistics = placeholder;
+            map.set(x.stateId, data);
+          }
+          
+        }
+      }
+      // console.log(map)
+      let countsArr = [];
+      for (let [key, val] of map.entries()) {
+        let state = {};
+        let count = JSON.parse(JSON.stringify(dataCountOthers));
+
+        state.stateId = key;
+        state.id = key;
+        state.state = val.state;
+        state.name = val.state;
+        state.text = val.state;
+        // console.log('Val');
+      //  console.log(val.statistics);
+        count.DpiitCertified = fillUndefined(val.statistics.dpiitCertified);
+        count.ShowcasedStartups = fillUndefined(val.statistics.showcased);
+        count.SeedFunded = fillUndefined(val.statistics.seedFunded);
+        count.FFS = fillUndefined(val.statistics.fundOfFunds);
+        count.Patented = fillUndefined(val.statistics.patented);
+        count.WomenLed = fillUndefined(val.statistics.womenOwned);
+        count.LeadingSector = fillUndefined(val.statistics.leadingSector);
+        count.DeclaredRewards = fillUndefined(val.statistics.declaredRewards);
+        // count.TaxExempted = fillUndefined(val.statistics.TaxExempted);
+
+        state.statistics = count;
+        countsArr.push(state);
+      }
+      output.data = countsArr;
+      resp.status(200).send(output);
+
+    } else if (req.params.geographicalEntity == "state") {
+      // State level
+      let stateId = req.params.entityId;
+      // console.log('stateId =',stateId);
+
+      let stateCounts = await populateStats2State(stateId, req.params.from, req.params.to, req.body);
+      // resp.send(JSON.stringify(stateCounts));
+      let map = new Map();
+      // items = districts
+      let items = Object.keys(stateCounts);
+      for (let i = 0; i < items.length; i++) {
+        let key = items[i];
+        let v = stateCounts[key].length ? stateCounts[key][0] : [];
+        for (let j = 0; j < v.length; j++) {
+          let x = v[j];
+          let c = x.count;
+          x = x._id;
+
+          if (map.has(x.districtId)) {
+            let countData = map.get(x.districtId);
+            countData.statistics[key] = c;
+            map.set(x.districtId, countData);
+          } else {
+            let placeholder = JSON.parse(JSON.stringify(dataCountOthers));
+            placeholder[key] = c;
+            let data = {};
+            data.districtId = x.districtId;
+            data.district = x.district;
+            data.stateId = x.stateId;
+            data.state = x.state;
+            data.statistics = placeholder;
+            map.set(x.districtId, data);
+          }
+        }
+      }
+
+      let countsArr = [];
+      for (let [key, val] of map.entries()) {
+        let district = {};
+        let count = JSON.parse(JSON.stringify(dataCountOthers));
+
+        district.districtId = key;
+        district.district = val.district;
+        district.stateId = val.stateId;
+        district.state = val.state;
+
+        
+        count.DpiitCertified = fillUndefined(val.statistics.dpiitCertified);
+        count.ShowcasedStartups = fillUndefined(val.statistics.showcased);
+        count.SeedFunded = fillUndefined(val.statistics.seedFunded);
+        count.FFS = fillUndefined(val.statistics.fundOfFunds);
+        count.Patented = fillUndefined(val.statistics.patented);
+        count.WomenLed = fillUndefined(val.statistics.womenOwned);
+        count.LeadingSector = fillUndefined(val.statistics.leadingSector);
+        count.DeclaredRewards = fillUndefined(val.statistics.declaredRewards);
+        // count.TaxExempted = fillUndefined(val.statistics.TaxExempted);
+
+        district.statistics = count;
+        countsArr.push(district);
+      }
+      output.data = countsArr;
+      resp.status(200).send(output);
+    } else {
+      // City/District level
+    }
+  }
+);
+
+async function populateStats1Country(from, to, body) {
+ 
+  from = new Date(from);
+	to = new Date(to);
+  let subQuery = {"profileRegisteredOn": { "$lte": (to), "$gte": (from), }};
+
+  if (body.hasOwnProperty('states') && body.states.length) {
+    let states = [];
+    for (let state of body.states) {
+      states.push(new ObjectId(state));
+    }
+    subQuery['stateId'] = {
+      "$in": body.states,
+    }
+  }
+
+  // if (body.hasOwnProperty('stateId') ) {
+   
+  //   subQuery.stateId = {
+  //     "$eq": body.stateId
+  //   }
+  // }
+  // console.log(subQuery);
+  if (body.hasOwnProperty('stages') && body.stages.length) {
+   
+    subQuery.stage = {
+      "$in": body.stages
+    }
+  }
+
+  if (body.hasOwnProperty('industries') && body.industries.length) {
+    let inds = [];
+    for (let ind of body.industries) {
+      inds.push(new ObjectId(ind));
+    }
+    subQuery['industry._id'] = {
+      "$in": inds,
+    }
+  }
+
+  if (body.hasOwnProperty('sectors') && body.sectors.length) {
+    let secs = [];
+    for (let sec of body.sectors) {
+      secs.push(new ObjectId(sec));
+    }
+    subQuery['sector._id'] = {
+      "$in": secs,
+    }
+  }
+  
+  const facetArr = ["Startup", "Investor", "Accelerator", "Mentor", "GovernmentBody", "Incubator"];
+
+  const groupQuery={ "_id": { "stateId": "$stateId", "state": "$stateName" }, "count": { "$sum": 1 }, };
+
+  let facetMap = new Map();
+  facetArr.forEach(e =>
+    facetMap.set(e, [{ "$match": { "role": { "$eq": e }, } },{ "$group": groupQuery }, ])
+  );
+  let facetQuery = Object.fromEntries(facetMap);
+
+  let projectMap = new Map();
+  facetArr.forEach(e =>
+    projectMap.set(e, [`$${e}`,0] )
+  
+  );
+  let projectQuery = Object.fromEntries(projectMap);
+
+  let query = [];
+  query.push({"$match": subQuery});
+  query.push({"$facet": facetQuery});
+  query.push({"$project": projectQuery});
+
+  let promAllCV3 = new Promise((resolve, rej) => {
+    try {
+      mongodb
+        .getDb()
+        .collection("digitalMapUser")
+        .aggregate(query).toArray(async (err, result) => {
+          if (err) throw err;
+          let output = await result[0];
+          resolve(output);
+        });
+    } catch (err) {
+      console.error('populateStats1Country :: ' + err.message);
+    }
+  });
+  return Promise.all([promAllCV3])
+    .then((values) => {
+      // console.log("All promises resolved - " + JSON.stringify(values));
+      return values[0];
+    })
+    .catch((reason) => {
+      console.log(reason);
+    });
+}
+
+async function populateStats1State(stateId, from, to, body) {
+
+   from = new Date(from);
+	to = new Date(to);
+  let subQuery = {
+    "profileRegisteredOn": { "$lte": (to), "$gte": (from), },
+    "stateId": { "$eq": stateId }
+  };
+  if (body.hasOwnProperty('stages') && body.stages.length) {
+    subQuery.stage = {
+      "$in": body.stages
+    }
+  }
+  if (body.hasOwnProperty('industries') && body.industries.length) {
+    let inds = [];
+    for (let ind of body.industries) {
+      inds.push(new ObjectId(ind));
+    }
+    subQuery['industry._id'] = {
+      "$in": inds,
+    }
+  }
+  if (body.hasOwnProperty('sectors') && body.sectors.length) {
+    let secs = [];
+    for (let sec of body.sectors) {
+      secs.push(new ObjectId(sec));
+    }
+    subQuery['sector._id'] = {
+      "$in": secs,
+    }
+  }
+  
+  const facetArr = ["Startup", "Investor", "Accelerator", "Mentor", "GovernmentBody", "Incubator"];
+
+  const groupQuery =  { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum":1 }, };
+
+  let facetMap = new Map();
+  facetArr.forEach(e =>
+    facetMap.set(e, [{ "$match": { "role": { "$eq": e }, } },{ "$group": groupQuery }, ])
+  );
+  let facetQuery = Object.fromEntries(facetMap);
+
+  let projectMap = new Map();
+  facetArr.forEach(e =>
+    projectMap.set(e, [`$${e}`,0] )
+  
+  );
+  let projectQuery = Object.fromEntries(projectMap);
+
+  let query = [];
+  query.push({"$match": subQuery});
+  query.push({"$facet": facetQuery});
+  query.push({"$project": projectQuery});
+  
+  let promAllV3 = new Promise((resolve, rej) => {
+    try {
+      mongodb
+        .getDb()
+        .collection("digitalMapUser")
+        .aggregate(query).toArray(async (err, result) => {
+          if (err) throw err;
+          let output = await result[0];
+          resolve(output);
+        });
+    } catch (err) {
+      console.error('populateStats1State :: ' + err.message);
+    }
+  });
+  return Promise.all([promAllV3])
+    .then((values) => {
+      // console.log("All promises resolved - " + JSON.stringify(values));
+      return values[0];
+    })
+    .catch((reason) => {
+      console.log(reason);
+    });
+}
+
+async function populateStats2Country(from, to, body) {
+ 
+  from = new Date(from);
+	to = new Date(to);
+  let subQuery = {"role":{"$eq":"Startup"},"profileRegisteredOn": { "$lte": (to), "$gte": (from), }};
+
+  if (body.hasOwnProperty('states') && body.states.length) {
+    let states = [];
+    for (let state of body.states) {
+      states.push(new ObjectId(state));
+    }
+    subQuery['stateId'] = {
+      "$in": body.states,
+    }
+  }
+
+  // if (body.hasOwnProperty('stateId') ) {
+   
+  //   subQuery.stateId = {
+  //     "$eq": body.stateId
+  //   }
+  // }
+  // console.log(subQuery);
+  if (body.hasOwnProperty('stages') && body.stages.length) {
+   
+    subQuery.stage = {
+      "$in": body.stages
+    }
+  }
+
+  if (body.hasOwnProperty('industries') && body.industries.length) {
+    let inds = [];
+    for (let ind of body.industries) {
+      inds.push(new ObjectId(ind));
+    }
+    subQuery['industry._id'] = {
+      "$in": inds,
+    }
+  }
+
+  if (body.hasOwnProperty('sectors') && body.sectors.length) {
+    let secs = [];
+    for (let sec of body.sectors) {
+      secs.push(new ObjectId(sec));
+    }
+    subQuery['sector._id'] = {
+      "$in": secs,
+    }
+  }
+
+  const facetArr = ["dpiitCertified", "showcased","seedFunded","fundOfFunds",
+  "seedFunded","patented","womenOwned", "leadingSector", "declaredRewards"];
+
+  const groupQuery={ "_id": { "stateId": "$stateId", "state": "$stateName" }, "count": { "$sum": 1 }, };
+
+  let facetMap = new Map();
+  facetArr.forEach(e =>
+    facetMap.set(e, [{ "$match": { [e]: { "$eq": true }, } },{ "$group": groupQuery }, ])
+  );
+  let facetQuery = Object.fromEntries(facetMap);
+
+  let projectMap = new Map();
+  facetArr.forEach(e =>
+    projectMap.set(e, [`$${e}`,0] )
+  
+  );
+  let projectQuery = Object.fromEntries(projectMap);
+
+  let query = [];
+  query.push({"$match": subQuery});
+  query.push({"$facet": facetQuery});
+  query.push({"$project": projectQuery});
+// console.log(query)
+  let promAllCV3 = new Promise((resolve, rej) => {
+    try {
+      mongodb
+        .getDb()
+        .collection("digitalMapUser")
+        .aggregate(query).toArray(async (err, result) => {
+          if (err) throw err;
+          let output = await result[0];
+          resolve(output);
+        });
+    } catch (err) {
+      console.error('populateStats2Country :: ' + err.message);
+    }
+  });
+  return Promise.all([promAllCV3])
+    .then((values) => {
+      // console.log("All promises resolved - " + JSON.stringify(values));
+      return values[0];
+    })
+    .catch((reason) => {
+      console.log(reason);
+    });
+}
+
+async function populateStats1State(stateId, from, to, body) {
+
+   from = new Date(from);
+	to = new Date(to);
+  let subQuery = {
+    "profileRegisteredOn": { "$lte": (to), "$gte": (from), },
+    "stateId": { "$eq": stateId }
+  };
+  if (body.hasOwnProperty('stages') && body.stages.length) {
+    subQuery.stage = {
+      "$in": body.stages
+    }
+  }
+  if (body.hasOwnProperty('industries') && body.industries.length) {
+    let inds = [];
+    for (let ind of body.industries) {
+      inds.push(new ObjectId(ind));
+    }
+    subQuery['industry._id'] = {
+      "$in": inds,
+    }
+  }
+  if (body.hasOwnProperty('sectors') && body.sectors.length) {
+    let secs = [];
+    for (let sec of body.sectors) {
+      secs.push(new ObjectId(sec));
+    }
+    subQuery['sector._id'] = {
+      "$in": secs,
+    }
+  }
+  
+  const facetArr = ["Startup", "Investor", "Accelerator", "Mentor", "GovernmentBody", "Incubator"];
+
+  const groupQuery =  { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum":1 }, };
+
+  let facetMap = new Map();
+  facetArr.forEach(e =>
+    facetMap.set(e, [{ "$match": { "role": { "$eq": e }, } },{ "$group": groupQuery }, ])
+  );
+  let facetQuery = Object.fromEntries(facetMap);
+
+  let projectMap = new Map();
+  facetArr.forEach(e =>
+    projectMap.set(e, [`$${e}`,0] )
+  
+  );
+  let projectQuery = Object.fromEntries(projectMap);
+
+  let query = [];
+  query.push({"$match": subQuery});
+  query.push({"$facet": facetQuery});
+  query.push({"$project": projectQuery});
+  
+  let promAllV3 = new Promise((resolve, rej) => {
+    try {
+      mongodb
+        .getDb()
+        .collection("digitalMapUser")
+        .aggregate(query).toArray(async (err, result) => {
+          if (err) throw err;
+          let output = await result[0];
+          resolve(output);
+        });
+    } catch (err) {
+      console.error('populateStats1State :: ' + err.message);
+    }
+  });
+  return Promise.all([promAllV3])
+    .then((values) => {
+      // console.log("All promises resolved - " + JSON.stringify(values));
+      return values[0];
+    })
+    .catch((reason) => {
+      console.log(reason);
+    });
+}
+
+async function populateStats2State(stateId, from, to, body) {
+
+ from = new Date(from);
+ to = new Date(to);
+ let subQuery = {
+   "profileRegisteredOn": { "$lte": (to), "$gte": (from), },
+   "stateId": { "$eq": stateId }
+ };
+ if (body.hasOwnProperty('stages') && body.stages.length) {
+   subQuery.stage = {
+     "$in": body.stages
+   }
+ }
+ if (body.hasOwnProperty('industries') && body.industries.length) {
+   let inds = [];
+   for (let ind of body.industries) {
+     inds.push(new ObjectId(ind));
+   }
+   subQuery['industry._id'] = {
+     "$in": inds,
+   }
+ }
+ if (body.hasOwnProperty('sectors') && body.sectors.length) {
+   let secs = [];
+   for (let sec of body.sectors) {
+     secs.push(new ObjectId(sec));
+   }
+   subQuery['sector._id'] = {
+     "$in": secs,
+   }
+ }
+
+ const facetArr = ["dpiitCertified", "showcased","seedFunded","fundOfFunds",
+  "seedFunded","patented","womenOwned", "leadingSector", "declaredRewards"];
+
+  const groupQuery =  { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum":1 }, };
+
+  let facetMap = new Map();
+  facetArr.forEach(e =>
+    facetMap.set(e, [{ "$match": { [e]: { "$eq": true }, } },{ "$group": groupQuery }, ])
+  );
+
+
+  let facetQuery = Object.fromEntries(facetMap);
+
+  let projectMap = new Map();
+  facetArr.forEach(e =>
+    projectMap.set(e, [`$${e}`,0] )
+  
+  );
+  let projectQuery = Object.fromEntries(projectMap);
+
+ let query = [];
+ query.push({"$match": subQuery});
+ query.push({"$facet": facetQuery});
+ query.push({"$project": projectQuery});
+ 
+ let promAllV3 = new Promise((resolve, rej) => {
+   try {
+     mongodb
+       .getDb()
+       .collection("digitalMapUser")
+       .aggregate(query).toArray(async (err, result) => {
+         if (err) throw err;
+         let output = await result[0];
+         resolve(output);
+       });
+   } catch (err) {
+     console.error('populateStats2State :: ' + err.message);
+   }
+ });
+ return Promise.all([promAllV3])
+   .then((values) => {
+     // console.log("All promises resolved - " + JSON.stringify(values));
+     return values[0];
+   })
+   .catch((reason) => {
+     console.log(reason);
+   });
 }
 
 module.exports = router;
