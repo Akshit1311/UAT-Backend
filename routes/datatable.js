@@ -1354,8 +1354,8 @@ async function populateMultiFieldCountsForStateV3(stateId, from, to, body) {
 
 async function populateMultiFieldCountsForCountryV3(from, to, body) {
  
-  from = new Date(from);
-	to = new Date(to);
+  // from = new Date(from);
+	// to = new Date(to);
   let startupQ = { "role": { "$eq": 'Startup' }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
   startupQ = addAdditionalMatchConditions(startupQ, body);
   // console.log("start");
@@ -1684,6 +1684,9 @@ router.post(
     output.from = req.params.from;
     output.to = req.params.to;
 
+    const from = new Date (req.params.from);
+    const to = new Date (req.params.to);
+
     if ((!_.isEmpty(req.params.from) && !_.isEmpty(req.params.to)) ||
       moment(req.params.from, "YYYY-MM-DD", true).isValid() && moment(req.params.to, "YYYY-MM-DD", true).isValid()) {
       console.log("Valid dates passed.")
@@ -1693,14 +1696,14 @@ router.post(
 
     let subQuery = {};
     subQuery.profileRegisteredOn = {
-      "$lte": new Date (req.params.to),
-      "$gte": new Date (req.params.from),
+      "$lte": to,
+      "$gte": from,
     };
 // resp.send(JSON.stringify(req.params));
     var result = [];
     if (req.params.geographicalEntity == "country") {
       // Country - India level
-      let countryCounts = await populateStats1Country(req.params.from, req.params.to, req.body);
+      let countryCounts = await populateStats1Country(from, to, req.body);
 
       let map = new Map();
       // items = states
@@ -1759,7 +1762,7 @@ router.post(
       let stateId = req.params.entityId;
       // console.log('stateId =',stateId);
 
-      let stateCounts = await populateStats1State(stateId, req.params.from, req.params.to, req.body);
+      let stateCounts = await populateStats1State(stateId, from, to, req.body);
       // resp.send(JSON.stringify(stateCounts));
       let map = new Map();
       // items = districts
@@ -1842,6 +1845,9 @@ router.post(
     output.from = req.params.from;
     output.to = req.params.to;
 
+    const from = new Date (req.params.from);
+    const to = new Date (req.params.to);
+
     if ((!_.isEmpty(req.params.from) && !_.isEmpty(req.params.to)) ||
       moment(req.params.from, "YYYY-MM-DD", true).isValid() && moment(req.params.to, "YYYY-MM-DD", true).isValid()) {
       console.log("Valid dates passed.")
@@ -1851,25 +1857,24 @@ router.post(
 
     let subQuery = {};
     subQuery.profileRegisteredOn = {
-      "$lte": new Date (req.params.to),
-      "$gte": new Date (req.params.from),
+      "$lte": to,
+      "$gte": from,
     };
 // resp.send(JSON.stringify(req.params));
     var result = [];
     if (req.params.geographicalEntity == "country") {
       // Country - India level
-      let countryCounts = await populateStats2Country(req.params.from, req.params.to, req.body);
-      // console.log(countryCounts)
+      let countryCounts = await populateStats2Country(from , to, req.body);
+    
       let map = new Map();
       
       //Get all keys i.e. statistics received
       let items = Object.keys(countryCounts);
-      // console.log(items)
   
       for (let i = 0; i < items.length; i++) {
         let key = items[i];
         let v = countryCounts[key].length ? countryCounts[key][0] : [];
-      //  console.log(v)
+      
         for (let j = 0; j < v.length; j++) {
           let x = v[j];
           let c = x.count;
@@ -1892,7 +1897,7 @@ router.post(
           
         }
       }
-      // console.log(map)
+   
       let countsArr = [];
       for (let [key, val] of map.entries()) {
         let state = {};
@@ -1903,8 +1908,7 @@ router.post(
         state.state = val.state;
         state.name = val.state;
         state.text = val.state;
-        // console.log('Val');
-      //  console.log(val.statistics);
+       
         count.DpiitCertified = fillUndefined(val.statistics.dpiitCertified);
         count.ShowcasedStartups = fillUndefined(val.statistics.showcased);
         count.SeedFunded = fillUndefined(val.statistics.seedFunded);
@@ -1926,7 +1930,7 @@ router.post(
       let stateId = req.params.entityId;
       // console.log('stateId =',stateId);
 
-      let stateCounts = await populateStats2State(stateId, req.params.from, req.params.to, req.body);
+      let stateCounts = await populateStats2State(stateId, from, to, req.body);
       // resp.send(JSON.stringify(stateCounts));
       let map = new Map();
       // items = districts
@@ -1991,8 +1995,6 @@ router.post(
 
 async function populateStats1Country(from, to, body) {
  
-  from = new Date(from);
-	to = new Date(to);
   let subQuery = {"profileRegisteredOn": { "$lte": (to), "$gte": (from), }};
 
   if (body.hasOwnProperty('states') && body.states.length) {
@@ -2005,13 +2007,6 @@ async function populateStats1Country(from, to, body) {
     }
   }
 
-  // if (body.hasOwnProperty('stateId') ) {
-   
-  //   subQuery.stateId = {
-  //     "$eq": body.stateId
-  //   }
-  // }
-  // console.log(subQuery);
   if (body.hasOwnProperty('stages') && body.stages.length) {
    
     subQuery.stage = {
@@ -2087,8 +2082,6 @@ async function populateStats1Country(from, to, body) {
 
 async function populateStats1State(stateId, from, to, body) {
 
-   from = new Date(from);
-	to = new Date(to);
   let subQuery = {
     "profileRegisteredOn": { "$lte": (to), "$gte": (from), },
     "stateId": { "$eq": stateId }
@@ -2165,8 +2158,6 @@ async function populateStats1State(stateId, from, to, body) {
 
 async function populateStats2Country(from, to, body) {
  
-  from = new Date(from);
-	to = new Date(to);
   let subQuery = {"role":{"$eq":"Startup"},"profileRegisteredOn": { "$lte": (to), "$gte": (from), }};
 
   if (body.hasOwnProperty('states') && body.states.length) {
@@ -2179,13 +2170,6 @@ async function populateStats2Country(from, to, body) {
     }
   }
 
-  // if (body.hasOwnProperty('stateId') ) {
-   
-  //   subQuery.stateId = {
-  //     "$eq": body.stateId
-  //   }
-  // }
-  // console.log(subQuery);
   if (body.hasOwnProperty('stages') && body.stages.length) {
    
     subQuery.stage = {
@@ -2230,6 +2214,7 @@ async function populateStats2Country(from, to, body) {
   
   );
   let projectQuery = Object.fromEntries(projectMap);
+  console.log(projectQuery)
 
   let query = [];
   query.push({"$match": subQuery});
@@ -2262,8 +2247,6 @@ async function populateStats2Country(from, to, body) {
 
 async function populateStats1State(stateId, from, to, body) {
 
-   from = new Date(from);
-	to = new Date(to);
   let subQuery = {
     "profileRegisteredOn": { "$lte": (to), "$gte": (from), },
     "stateId": { "$eq": stateId }
@@ -2340,8 +2323,6 @@ async function populateStats1State(stateId, from, to, body) {
 
 async function populateStats2State(stateId, from, to, body) {
 
- from = new Date(from);
- to = new Date(to);
  let subQuery = {
    "profileRegisteredOn": { "$lte": (to), "$gte": (from), },
    "stateId": { "$eq": stateId }

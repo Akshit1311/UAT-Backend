@@ -7,6 +7,11 @@ const _ = require('lodash');
 const { map } = require("lodash");
 const e = require("express");
 
+const roleTypes = ["Startup", "Investor", "Accelerator", "Mentor", "GovernmentBody", "Incubator"];
+
+const startupTypes = ["dpiitCertified", "showcased","seedFunded","fundOfFunds",
+"seedFunded","patented","womenOwned", "leadingSector", "declaredRewards"];
+
 //Get top numbers POST API
 router.post("/topNumbers", async (req, resp) => {
   //This Api returns count of Startups, Mentors, Incubators, Investors, Accelerators and Government sectors for whole country
@@ -17,52 +22,13 @@ router.post("/topNumbers", async (req, resp) => {
   //Array to accept variable parameters e.g. stateId, industries, sectors, from and to dates
   const acceptedParams = [];
   const industries = [];
-  from = new Date(req.body.from);
-  to = new Date(req.body.to);
+  const sectors=[];
+  const badges=[];
+  checkBody(req.body,acceptedParams,industries,sectors,badges);
 
-  if ((!_.isEmpty(req.body.from)) && (!_.isEmpty(req.body.to))) {
-    if (moment(req.body.from, "YYYY-MM-DD", true).isValid() && moment(req.body.to, "YYYY-MM-DD", true).isValid()) {
-      acceptedParams.push("profileRegisteredOn");
-      console.log("Valid dates passed.")
-    }
-    else {
-      resp.status(500).json({ message: 'Invalid Date Format, expected in YYYY-MM-DD' });
-    }
-  }
-  
-  if (!_.isEmpty(req.body.stateId)) {
-    acceptedParams.push("stateId");
-  }
+  const from = new Date(req.body.from);
+  const to = new Date(req.body.to);
 
-  if (!_.isEmpty(req.body.districtId)) {
-    acceptedParams.push("districtId");
-  }
-
-  if (!_.isEmpty(req.body.industries)) {
-    acceptedParams.push("industries");
-
-    for (let industry of req.body.industries) {
-      industries.push(industry);
-    }
-  }
-
-  let sectors = [];
-  if (!_.isEmpty(req.body.sectors)) {
-    acceptedParams.push("sectors");
-
-    for (let sector of req.body.sectors) {
-      sectors.push(sector);
-    }
-  }
-
-  let badges = [];
-  if (!_.isEmpty(req.body.badges)) {
-    acceptedParams.push("badges");
-
-    for (let badge of req.body.badges) {
-      badges.push(badge);
-    }
-  }
   //Building default query set for building final queries based on input parameters
   const obj = {
     profileRegisteredOn: { "profileRegisteredOn": { "$gte": from, "$lte": to } },
@@ -74,16 +40,15 @@ router.post("/topNumbers", async (req, resp) => {
   }
 
   const matchQueryArr = Object.keys(obj).filter(key => acceptedParams.includes(key)).map(key => obj[key])
-  const facetArr = ["Startup", "Investor", "Accelerator", "Mentor", "GovernmentBody", "Incubator"];
   
   let facetMap = new Map();
-  facetArr.forEach(e =>
+  roleTypes.forEach(e =>
     facetMap.set(e, [{ "$match": { "role": { "$eq": e }, } }, { "$count": e }])
   );
   let facetQuery = Object.fromEntries(facetMap);
 
   let projectMap = new Map();
-  facetArr.forEach(e =>
+  roleTypes.forEach(e =>
     projectMap.set(e, { "$arrayElemAt": [`$${e}.${e}`, 0] })
   );
 ;
@@ -98,30 +63,7 @@ router.post("/topNumbers", async (req, resp) => {
   };
   query.push({"$facet": facetQuery});
   query.push({"$project": projectQuery});
-
-  var promAll = new Promise((resolve, rej) => {
-    try {
-      mongodb
-        .getDb()
-        .collection("digitalMapUser")
-        .aggregate(query).toArray(async (err, result) => {
-          if (err) throw err;
-          let output = await result[0];
-          resolve(output);
-          resp.send(output);
-        });
-    } catch (err) {
-      console.error('toNumbers :: ' + err.message);
-    }
-  });
-  return Promise.all([promAll])
-    .then((values) => {
-      console.log("All promises resolved - " + JSON.stringify(values));
-      return values[0];
-    })
-    .catch((reason) => {
-      console.log(reason);
-    });
+  return executeQuery(resp,query);
 
 });
 router.get("/startupCounts", async (req, resp) => {
@@ -133,52 +75,11 @@ router.get("/startupCounts", async (req, resp) => {
   //Array to accept variable parameters e.g. stateId, industries, sectors, from and to dates
   const acceptedParams = ["role"];
   const industries = [];
-  from = new Date(req.query.from);
-  to = new Date(req.query.to);
-  console.log(req.query);
-  if ((!_.isEmpty(req.query.from)) && (!_.isEmpty(req.query.to))) {
-    if (moment(req.query.from, "YYYY-MM-DD", true).isValid() && moment(req.query.to, "YYYY-MM-DD", true).isValid()) {
-      acceptedParams.push("profileRegisteredOn");
-      console.log("Valid dates passed.")
-    }
-    else {
-      resp.status(500).json({ message: 'Invalid Date Format, expected in YYYY-MM-DD' });
-    }
-  }
-
-  if (!_.isEmpty(req.query.stateId)) {
-    acceptedParams.push("stateId");
-  }
-
-  if (!_.isEmpty(req.query.districtId)) {
-    acceptedParams.push("districtId");
-  }
-
-  if (!_.isEmpty(req.query.industries)) {
-    acceptedParams.push("industries");
-
-    for (let industry of req.query.industries) {
-      industries.push(industry);
-    }
-  }
-
-  let sectors = [];
-  if (!_.isEmpty(req.query.sectors)) {
-    acceptedParams.push("sectors");
-
-    for (let sector of req.query.sectors) {
-      sectors.push(sector);
-    }
-  }
-
-  let badges = [];
-  if (!_.isEmpty(req.query.badges)) {
-    acceptedParams.push("badges");
-
-    for (let badge of req.query.badges) {
-      badges.push(badge);
-    }
-  }
+  const sectors=[];
+  const badges=[];
+  checkBody(req.query,acceptedParams,industries,sectors,badges)
+  const from = new Date(req.query.from);
+  const to = new Date(req.query.to);
 
   //Building default body set for building final queries based on input parameters
   const obj = {
@@ -191,20 +92,16 @@ router.get("/startupCounts", async (req, resp) => {
     badges: { "badges": { "$exists": true, "$type": 'array', "$ne": [] } }
   }
 
-
   const matchQueryArr = Object.keys(obj).filter(key => acceptedParams.includes(key)).map(key => obj[key])
-  const facetArr = ["dpiitCertified", "showcased","seedFunded","fundOfFunds",
-  "seedFunded","patented","womenOwned", "leadingSector", "declaredRewards"];
 
-  console.log(matchQueryArr);
   let facetMap = new Map();
-  facetArr.forEach(e =>
-    facetMap.set(e, [{ "$match": { [e]: { "$eq":true }, } }, { "$count": e }])
+  startupTypes.forEach(e =>
+    facetMap.set(e, [{ "$match": { [e]: { "$eq": true }, } }, { "$count": e }])
   );
 
   let facetQuery = Object.fromEntries(facetMap);
   let projectMap = new Map();
-  facetArr.forEach(e =>
+  startupTypes.forEach(e =>
     projectMap.set(e, { "$arrayElemAt": [`$${e}.${e}`, 0] })
 
   );
@@ -218,30 +115,7 @@ router.get("/startupCounts", async (req, resp) => {
   query.push({"$facet": facetQuery});
   query.push({"$project": projectQuery});
 
-
-  var promAll = new Promise((resolve, rej) => {
-    try {
-      mongodb
-        .getDb()
-        .collection("digitalMapUser")
-        .aggregate(query).toArray(async (err, result) => {
-          if (err) throw err;
-          let output = await result[0];
-          resolve(output);
-          resp.send(output);
-        });
-    } catch (err) {
-      console.error('toNumbers :: ' + err.message);
-    }
-  });
-  return Promise.all([promAll])
-    .then((values) => {
-      console.log("All promises resolved - " + JSON.stringify(values));
-      return values[0];
-    })
-    .catch((reason) => {
-      console.log(reason);
-    });
+return executeQuery(resp,query);
 
 });
 
@@ -293,5 +167,73 @@ async function getSectorWiseCounts(stateId='') {
 
 }
 
+function checkBody(param,acceptedParams,industries,sectors,badges) {
+  if ((!_.isEmpty(param.from)) && (!_.isEmpty(param.to))) {
+    if (moment(param.from, "YYYY-MM-DD", true).isValid() && moment(param.to, "YYYY-MM-DD", true).isValid()) {
+      acceptedParams.push("profileRegisteredOn");
+      console.log("Valid dates passed.")
+    }
+    else {
+      resp.status(500).json({ message: 'Invalid Date Format, expected in YYYY-MM-DD' });
+    }
+  }
+  
+  if (!_.isEmpty(param.stateId)) {
+    acceptedParams.push("stateId");
+  }
 
+  if (!_.isEmpty(param.districtId)) {
+    acceptedParams.push("districtId");
+  }
+
+  if (!_.isEmpty(param.industries)) {
+    acceptedParams.push("industries");
+
+    for (let industry of param.industries) {
+      industries.push(industry);
+    }
+  }
+
+  if (!_.isEmpty(param.sectors)) {
+    acceptedParams.push("sectors");
+
+    for (let sector of param.sectors) {
+      sectors.push(sector);
+    }
+  }
+
+  if (!_.isEmpty(param.badges)) {
+    acceptedParams.push("badges");
+
+    for (let badge of param.badges) {
+      badges.push(badge);
+    }
+  }
+}
+
+async function executeQuery(resp,query) {
+  let promAll = new Promise((resolve, rej) => {
+    try {
+      mongodb
+        .getDb()
+        .collection("digitalMapUser")
+        .aggregate(query).toArray(async (err, result) => {
+          if (err) throw err;
+          let output = await result[0];
+          resolve(output);
+          resp.send(output);
+        });
+    } catch (err) {
+      console.error('toNumbers :: ' + err.message);
+    }
+  });
+  return Promise.all([promAll])
+    .then((values) => {
+      console.log("All promises resolved - " + JSON.stringify(values));
+      return values[0];
+    })
+    .catch((reason) => {
+      console.log(reason);
+    });
+}
 module.exports = router;
