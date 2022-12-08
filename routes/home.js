@@ -42,16 +42,19 @@ router.post("/topNumbers", async (req, resp) => {
   const matchQueryArr = Object.keys(obj).filter(key => acceptedParams.includes(key)).map(key => obj[key])
   
   let facetMap = new Map();
-  roleTypes.forEach(e =>
-    facetMap.set(e, [{ "$match": { "role": { "$eq": e }, } }, { "$count": e }])
+  let projectMap = new Map();
+  roleTypes.forEach(e =>{
+    facetMap.set(e, [{ "$match": { "role": { "$eq": e }, } }, { "$count": e }]);
+    projectMap.set(e, { "$arrayElemAt": [`$${e}.${e}`, 0] })
+  }
   );
   let facetQuery = Object.fromEntries(facetMap);
 
-  let projectMap = new Map();
-  roleTypes.forEach(e =>
-    projectMap.set(e, { "$arrayElemAt": [`$${e}.${e}`, 0] })
-  );
-;
+//   let projectMap = new Map();
+//   roleTypes.forEach(e =>
+//     projectMap.set(e, { "$arrayElemAt": [`$${e}.${e}`, 0] })
+//   );
+// ;
   let projectQuery = Object.fromEntries(projectMap);
  
   let query = [];
@@ -95,16 +98,19 @@ router.get("/startupCounts", async (req, resp) => {
   const matchQueryArr = Object.keys(obj).filter(key => acceptedParams.includes(key)).map(key => obj[key])
 
   let facetMap = new Map();
-  startupTypes.forEach(e =>
-    facetMap.set(e, [{ "$match": { [e]: { "$eq": true }, } }, { "$count": e }])
+  let projectMap = new Map();
+  startupTypes.forEach(e => {
+    facetMap.set(e, [{ "$match": { [e]: { "$eq": true }, } }, { "$count": e }]);
+    projectMap.set(e, { "$arrayElemAt": [`$${e}.${e}`, 0] });
+  }
   );
 
   let facetQuery = Object.fromEntries(facetMap);
-  let projectMap = new Map();
-  startupTypes.forEach(e =>
-    projectMap.set(e, { "$arrayElemAt": [`$${e}.${e}`, 0] })
+  // let projectMap = new Map();
+  // startupTypes.forEach(e =>
+  //   projectMap.set(e, { "$arrayElemAt": [`$${e}.${e}`, 0] })
 
-  );
+  // );
  
   let projectQuery = Object.fromEntries(projectMap);
   let query=[];
@@ -153,7 +159,7 @@ async function getSectorWiseCounts(stateId='') {
           resolve(output);
         });
     } catch (err) {
-      console.error('toNumbers :: ' + err.message);
+      console.error('sectorwiseCounts :: ' + err.message);
     }
   });
   return Promise.all([prom])
