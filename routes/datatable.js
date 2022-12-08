@@ -401,7 +401,7 @@ router.post(
     output.to = req.params.to;
 
     const from = new Date (req.params.from);
-    const to = new Date (req.params.to);
+    const to =  new Date (req.params.to);
 
     if ((!_.isEmpty(req.params.from) && !_.isEmpty(req.params.to)) ||
       moment(req.params.from, "YYYY-MM-DD", true).isValid() && moment(req.params.to, "YYYY-MM-DD", true).isValid()) {
