@@ -400,6 +400,9 @@ router.post(
     output.from = req.params.from;
     output.to = req.params.to;
 
+    const from = new Date (req.params.from);
+    const to = new Date (req.params.to);
+
     if ((!_.isEmpty(req.params.from) && !_.isEmpty(req.params.to)) ||
       moment(req.params.from, "YYYY-MM-DD", true).isValid() && moment(req.params.to, "YYYY-MM-DD", true).isValid()) {
       console.log("Valid dates passed.")
@@ -409,14 +412,14 @@ router.post(
 
     let subQuery = {};
     subQuery.profileRegisteredOn = {
-      "$lte": new Date (req.params.to),
-      "$gte": new Date (req.params.from),
+      "$lte": to,
+      "$gte": from
     };
 // resp.send(JSON.stringify(req.params));
     var result = [];
     if (req.params.geographicalEntity == "country") {
       // Country - India level
-      let countryCounts = await populateMultiFieldCountsForCountryV3(req.params.from, req.params.to, req.body);
+      let countryCounts = await populateMultiFieldCountsForCountryV3(from,to, req.body);
 
       let map = new Map();
       // items = states
@@ -482,7 +485,7 @@ router.post(
       let stateId = req.params.entityId;
       // console.log('stateId =',stateId);
 
-      let stateCounts = await populateMultiFieldCountsForStateV3(stateId, req.params.from, req.params.to, req.body);
+      let stateCounts = await populateMultiFieldCountsForStateV3(stateId, from, to, req.body);
       // resp.send(JSON.stringify(stateCounts));
       let map = new Map();
       // items = districts
@@ -1203,8 +1206,7 @@ async function populateMultiFieldCountsForStateV2(stateId, from, to) {
 }
 
 async function populateMultiFieldCountsForStateV3(stateId, from, to, body) {
-  from = new Date(from);
-	to = new Date(to);
+ 
   let startupQ = { "role": { "$eq": 'Startup' }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
   startupQ = addAdditionalMatchConditions(startupQ, body);
 
@@ -1354,8 +1356,6 @@ async function populateMultiFieldCountsForStateV3(stateId, from, to, body) {
 
 async function populateMultiFieldCountsForCountryV3(from, to, body) {
  
-  // from = new Date(from);
-	// to = new Date(to);
   let startupQ = { "role": { "$eq": 'Startup' }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } };
   startupQ = addAdditionalMatchConditions(startupQ, body);
   // console.log("start");
