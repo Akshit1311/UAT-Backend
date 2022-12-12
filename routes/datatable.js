@@ -400,7 +400,7 @@ router.post(
     output.from = req.params.from;
     output.to = req.params.to;
 
-    const from =  new Date(req.params.from);
+    const from = new Date(req.params.from);
     const to =  new Date(req.params.to);
 
     if ((!_.isEmpty(req.params.from) && !_.isEmpty(req.params.to)) ||
@@ -1359,53 +1359,55 @@ async function populateMultiFieldCountsForStateV3(stateId, from, to, body) {
 
 async function populateMultiFieldCountsForCountryV3(from, to, body) {
  
+  let matchQuery = {"profileRegisteredOn": { "$lte": (to), "$gte": (from), }};
+  matchQuery=addAdditionalMatchConditions(matchQuery, body);
   const groupQuery = { "_id": { "stateId": "$stateId", "state": "$stateName" }, "count": { "$sum": 1 }, };
   let startupQ = { "role": { "$eq": 'Startup' } };
-  startupQ = addAdditionalMatchConditions(startupQ, body);
+  // startupQ = addAdditionalMatchConditions(startupQ, body);
   // console.log("start");
   // console.log(startupQ);
 
   let investorQ = { "role": { "$eq": 'Investor' } };
-  investorQ = addAdditionalMatchConditions(investorQ, body);
+  // investorQ = addAdditionalMatchConditions(investorQ, body);
 
   let acceleratorQ = { "role": { "$eq": 'Accelerator' } };
-  acceleratorQ = addAdditionalMatchConditions(acceleratorQ, body);
+  // acceleratorQ = addAdditionalMatchConditions(acceleratorQ, body);
 
   let individualQ = { "role": { "$eq": 'Individual' } };
-  individualQ = addAdditionalMatchConditions(individualQ, body);
+  // individualQ = addAdditionalMatchConditions(individualQ, body);
 
   let mentorQ = { "role": { "$eq": 'Mentor' } };
-  mentorQ = addAdditionalMatchConditions(mentorQ, body);
+  // mentorQ = addAdditionalMatchConditions(mentorQ, body);
 
   let govBodyQ = { "role": { "$eq": 'GovernmentBody' } };
-  govBodyQ = addAdditionalMatchConditions(govBodyQ, body);
+  // govBodyQ = addAdditionalMatchConditions(govBodyQ, body);
 
   let incubatorQ = { "role": { "$eq": 'Incubator' } };
-  incubatorQ = addAdditionalMatchConditions(incubatorQ, body);
+  // incubatorQ = addAdditionalMatchConditions(incubatorQ, body);
 
   let womenOwnedQ = { "womenOwned": { "$eq": true } };
-  womenOwnedQ = addAdditionalMatchConditions(womenOwnedQ, body);
+  // womenOwnedQ = addAdditionalMatchConditions(womenOwnedQ, body);
 
   let seedFundedQ = { "seedFunded": { "$eq": true } };
-  seedFundedQ = addAdditionalMatchConditions(seedFundedQ, body);
+  // seedFundedQ = addAdditionalMatchConditions(seedFundedQ, body);
 
   let taxExemptedQ = { "taxExempted": { "$eq": true } };
-  taxExemptedQ = addAdditionalMatchConditions(taxExemptedQ, body);
+  // taxExemptedQ = addAdditionalMatchConditions(taxExemptedQ, body);
 
   let dpiitCertifiedQ = { "dpiitCertified": { "$eq": true } };
-  dpiitCertifiedQ = addAdditionalMatchConditions(dpiitCertifiedQ, body);
+  // dpiitCertifiedQ = addAdditionalMatchConditions(dpiitCertifiedQ, body);
 
   let ffsQ = { "fundOfFunds": { "$eq": true } };
-  ffsQ = addAdditionalMatchConditions(ffsQ, body);
+  // ffsQ = addAdditionalMatchConditions(ffsQ, body);
 
   let showcasedQ = { "showcased": { "$eq": true } };
-  showcasedQ = addAdditionalMatchConditions(showcasedQ, body);
+  // showcasedQ = addAdditionalMatchConditions(showcasedQ, body);
 
   let patentedQ = { "patented": { "$eq": true } };
-  patentedQ = addAdditionalMatchConditions(patentedQ, body);
+  // patentedQ = addAdditionalMatchConditions(patentedQ, body);
  
   let query = [
-    {"$match":{"profileRegisteredOn": { "$lte": (to), "$gte": (from), }}},
+    {"$match": matchQuery},
     {
       "$facet": {
         "Startup": [
@@ -1504,7 +1506,7 @@ async function populateMultiFieldCountsForCountryV3(from, to, body) {
   });
   return Promise.all([promAllCV3])
     .then((values) => {
-      console.log("All promises resolved - " + JSON.stringify(values));
+      // console.log("All promises resolved - " + JSON.stringify(values));
       return values[0];
     })
     .catch((reason) => {
