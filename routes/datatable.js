@@ -1619,7 +1619,7 @@ async function populateMultiFieldCountsForCountry(from, to) {
   });
   return Promise.all([promAllCountry])
     .then((values) => {
-      console.log("populateMultiFieldCountsForCountry : All promises resolved - " + values.length);
+      // console.log("populateMultiFieldCountsForCountry : All promises resolved - " + values.length);
       return values[0];
     })
     .catch((reason) => {
