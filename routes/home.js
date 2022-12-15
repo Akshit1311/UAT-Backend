@@ -50,11 +50,6 @@ router.post("/topNumbers", async (req, resp) => {
   );
   let facetQuery = Object.fromEntries(facetMap);
 
-//   let projectMap = new Map();
-//   roleTypes.forEach(e =>
-//     projectMap.set(e, { "$arrayElemAt": [`$${e}.${e}`, 0] })
-//   );
-// ;
   let projectQuery = Object.fromEntries(projectMap);
  
   let query = [];
@@ -104,13 +99,12 @@ router.get("/startupCounts", async (req, resp) => {
     projectMap.set(e, { "$arrayElemAt": [`$${e}.${e}`, 0] });
   }
   );
+  //Add all startup counts
+  const as = "All Startups";
+  facetMap.set(as, [ { "$count": as }]);
+  projectMap.set(as, { "$arrayElemAt": [`$${as}.${as}`, 0] });
 
   let facetQuery = Object.fromEntries(facetMap);
-  // let projectMap = new Map();
-  // startupTypes.forEach(e =>
-  //   projectMap.set(e, { "$arrayElemAt": [`$${e}.${e}`, 0] })
-
-  // );
  
   let projectQuery = Object.fromEntries(projectMap);
   let query=[];
@@ -120,7 +114,7 @@ router.get("/startupCounts", async (req, resp) => {
    };
   query.push({"$facet": facetQuery});
   query.push({"$project": projectQuery});
-
+console.log(query);
 return executeQuery(resp,query);
 
 });
