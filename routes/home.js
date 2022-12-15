@@ -100,7 +100,7 @@ router.get("/startupCounts", async (req, resp) => {
   }
   );
   //Add all startup counts
-  const as = "All Startups";
+  const as = "allStartups";
   facetMap.set(as, [ { "$count": as }]);
   projectMap.set(as, { "$arrayElemAt": [`$${as}.${as}`, 0] });
 
