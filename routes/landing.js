@@ -301,7 +301,7 @@ router.post("/filter/defaults", (req, resp) => {
     //console.log(body);
     let allFilterableItems = JSON.parse(body).allFacets;
     // var allIndustriesArr = allFilterableItems[0].content;
-    // var allSectorsArr = allFilterableItems[1].content;
+    var allSectorsArr = allFilterableItems[1].content;
     // var allStatesArr = allFilterableItems[3].content;
     // var allStagesArr = allFilterableItems[6].content;
     // var allBadgesArr = allFilterableItems[7].content;
@@ -309,8 +309,9 @@ router.post("/filter/defaults", (req, resp) => {
     // var allDpiitCertifiedsArr = allFilterableItems[8].content;
    //All states
     output.states = allFilterableItems[3].content.map(transformData);
-    //All Sectors
-    output.sectors = uniqByKeepLast(allFilterableItems[1].content.map(transformData),e=>e.value);
+    //All Unique Sectors
+    output.sectors =   getUniqueListBy(allFilterableItems[1].content.map(transformData),'value');
+   
     //All Industries
     output.industries = allFilterableItems[0].content.map(transformData);
     //All Stages
@@ -1233,14 +1234,11 @@ function transformCount_Mongo(data) {
   return o;
 }
 
-//Returns an array of unique items keeping last occurrence of each item
-function uniqByKeepLast(data,key){
-  return [
-    ... new Map(
-      data.map(x=>[key[x],x])
-    ).values()
-  ]
+//Returns an array of unique items keeping last occurrence of each
+function getUniqueListBy(arr, key) {
+  return [...new Map(arr.map(item => [item[key], item])).values()]
 }
+
 
 async function getMyData(geoName) {
   console.log("Getting details for " + geoName);
