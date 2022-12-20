@@ -175,7 +175,7 @@ router.post("/startupCounts/:startupType", async (req, resp) => {
         facetMap.set(e, [ { "$count": e }]);
     }
     else {
-    facetMap.set(e, [{ "$match": { [e]: { "$eq": "1" }, } }, { "$count": e }]);
+    facetMap.set(e, [{ "$match": { [e]: { "$eq": true }, } }, { "$count": e }]);
     }
     projectMap.set(e, { "$arrayElemAt": [`$${e}.${e}`, 0] });
     
