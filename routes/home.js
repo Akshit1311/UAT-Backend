@@ -153,8 +153,8 @@ router.post("/startupCounts/:startupType", async (req, resp) => {
   if (!_.isEmpty(req.params.startupType)) {
     types.push(req.params.startupType);
   }
-  const from = (req.body.from);
-  const to = (req.body.to);
+  const from = new Date(req.body.from);
+  const to = new Date(req.body.to);
   const ind =industries.map(e=>e=ObjectId(e));
   const sect =sectors.map(e=>e=ObjectId(e));
   //Building default body set for building final queries based on input parameters
