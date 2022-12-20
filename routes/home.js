@@ -111,16 +111,13 @@ router.get("/startupCounts", async (req, resp) => {
       facetMap.set(e, [ { "$count": e }]);
   }
   else {
-  facetMap.set(e, [{ "$match": { [e]: { "$eq": "1" }, } }, { "$count": e }]);
+  facetMap.set(e, [{ "$match": { [e]: { "$eq": true }, } }, { "$count": e }]);
   }
   
     projectMap.set(e, { "$arrayElemAt": [`$${e}.${e}`, 0] });
   }
   );
-  //Add all startup counts
-  const as = "allStartups";
-  facetMap.set(as, [ { "$count": as }]);
-  projectMap.set(as, { "$arrayElemAt": [`$${as}.${as}`, 0] });
+
 
   let facetQuery = Object.fromEntries(facetMap);
  
