@@ -25,8 +25,9 @@ router.post("/topNumbers", async (req, resp) => {
   const acceptedParams = [];
   const industries = [];
   const sectors=[];
+  const stages=[];
   const badges=[];
-  checkBody(req.body,acceptedParams,industries,sectors,badges);
+  checkBody(req.body,acceptedParams,industries,sectors,stages,badges);
 
   const from = new Date(req.body.from);
   const to = new Date(req.body.to);
@@ -41,6 +42,7 @@ router.post("/topNumbers", async (req, resp) => {
     districtId: { "districtId": req.body.districtId },
     industries: { "industry._id": { $in: ind } },
     sectors: { "sector._id": { $in: sect } },
+    stages: { "stage": { $in: stages } },
     badges: { "badges": { "$exists": true, "$type": 'array', "$ne": [] } }
   }
 
@@ -80,10 +82,11 @@ router.get("/startupCounts", async (req, resp) => {
   const acceptedParams = ["role"];
   const industries = [];
   const sectors=[];
+  const stages=[];
   const badges=[];
   const types=[];
 
-  checkBody(req.query,acceptedParams,industries,sectors,badges);
+  checkBody(req.query,acceptedParams,industries,sectors,stages,badges);
   if (!_.isEmpty(req.query.type)) {
     types.push(req.query.type);
   }
@@ -98,6 +101,7 @@ router.get("/startupCounts", async (req, resp) => {
     districtId: { "districtId": req.query.districtId },
     industries: { "industry._id": { $in: industries } },
     sectors: { "sector._id": { $in: sectors } },
+    stages: { "stage": { $in: stages } },
     badges: { "badges": { "$exists": true, "$type": 'array', "$ne": [] } }
   }
 
@@ -143,11 +147,12 @@ router.post("/startupCounts/:startupType", async (req, resp) => {
   const acceptedParams = ["role"];
   const industries = [];
   const sectors=[];
+  const stages=[];
   const badges=[];
  
   let types = [...startupTypes];
 
-  checkBody(req.body,acceptedParams,industries,sectors,badges);
+  checkBody(req.body,acceptedParams,industries,sectors,stages,badges);
   if (!_.isEmpty(req.params.startupType)) {
     if ((startupTypes.includes(req.params.startupType))) {
       types=startupTypes.filter(e=>e===req.params.startupType)
@@ -166,6 +171,7 @@ router.post("/startupCounts/:startupType", async (req, resp) => {
     districtId: { "districtId": req.body.districtId },
     industries: { "industry._id": { $in: ind } },
     sectors: { "sector._id": { $in: sect } },
+    stages: { "stage": { $in: stages } },
     badges: { "badges": { "$exists": true, "$type": 'array', "$ne": [] } }
   }
 
@@ -207,8 +213,9 @@ router.post("/leadingSector",async(req,resp)=>{
 const acceptedParams = ["role"];
 const industries = [];
 const sectors=[];
+const stages=[];
 const badges=[];
-checkBody(req.body,acceptedParams,industries,sectors,badges);
+checkBody(req.body,acceptedParams,industries,sectors,stages,badges);
 
 //Convert to Date Format for comparison
 const from = new Date(req.body.from);
@@ -226,6 +233,7 @@ const obj = {
   districtId: { "districtId": req.body.districtId },
   industries: { "industry._id": { $in: ind } },
   sectors: { "sector._id": { $in: sect } },
+  stages: { "stage": { $in: stages } },
   badges: { "badges": { "$exists": true, "$type": 'array', "$ne": [] } }
 };
 const matchQueryArr = Object.keys(obj).filter(key => acceptedParams.includes(key)).map(key => obj[key])
@@ -317,7 +325,7 @@ async function getSectorWiseCounts(stateId='') {
 
 }
 
-function checkBody(param,acceptedParams,industries,sectors,badges) {
+function checkBody(param,acceptedParams,industries,sectors,stages,badges) {
   if ((!_.isEmpty(param.from)) && (!_.isEmpty(param.to))) {
     if (moment(param.from, "YYYY-MM-DD", true).isValid() && moment(param.to, "YYYY-MM-DD", true).isValid()) {
       acceptedParams.push("profileRegisteredOn");
@@ -349,6 +357,14 @@ function checkBody(param,acceptedParams,industries,sectors,badges) {
 
     for (let sector of param.sectors) {
       sectors.push(sector);
+    }
+  }
+
+  if (!_.isEmpty(param.stages)) {
+    acceptedParams.push("stages");
+
+    for (let stage of param.stages) {
+      stages.push(stage);
     }
   }
 
