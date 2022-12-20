@@ -151,14 +151,12 @@ router.post("/startupCounts/:startupType", async (req, resp) => {
   checkBody(req.body,acceptedParams,industries,sectors,badges);
   if (!_.isEmpty(req.params.startupType)) {
     if (!(validStartupTypes.includes(req.params.startupType))) {
-      resp.send({error:"Invalid Startup Type"});
+      types = [...validStartupTypes];
     }else {
     types.push(req.params.startupType);
     }
   }
-  else { //if no startup type passed then return everything
-    types = [...validStartupTypes];
-  }
+
 
   const from =new Date(req.body.from);
   const to =new Date(req.body.to);
