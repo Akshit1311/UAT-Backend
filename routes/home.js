@@ -144,19 +144,15 @@ router.post("/startupCounts/:startupType", async (req, resp) => {
   const industries = [];
   const sectors=[];
   const badges=[];
-  const types=[];
-  const validStartupTypes=["allStartups","dpiitCertified", "showcased","seedFunded","fundOfFunds",
-  "seedFunded","patented","womenOwned", "leadingSector", "declaredRewards"];
+ 
+  let types = [...startupTypes];
 
   checkBody(req.body,acceptedParams,industries,sectors,badges);
   if (!_.isEmpty(req.params.startupType)) {
-    if (!(validStartupTypes.includes(req.params.startupType))) {
-      types = [...validStartupTypes];
-    }else {
-    types.push(req.params.startupType);
+    if ((startupTypes.includes(req.params.startupType))) {
+      types=startupTypes.filter(e=>e===req.params.startupType)
     }
   }
-
 
   const from =new Date(req.body.from);
   const to =new Date(req.body.to);
