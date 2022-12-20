@@ -202,6 +202,40 @@ return executeQuery(resp,query);
 
 });
 
+router.post("/leadingSector",async(req,resp)=>{
+//Array to accept variable parameters e.g. stateId, industries, sectors, from and to dates
+const acceptedParams = ["role"];
+const industries = [];
+const sectors=[];
+const badges=[];
+checkBody(req.body,acceptedParams,industries,sectors,badges);
+
+//Convert to Date Format for comparison
+const from = new Date(req.body.from);
+const to = new Date(req.body.to);
+
+//Add Object Id for compatibility with mongodb version 3.4.17
+const ind =industries.map(e=>e=ObjectId(e));
+const sect =sectors.map(e=>e=ObjectId(e));
+
+//Building default body set for building final queries based on input parameters
+const obj = {
+  role: { "role": { "$eq": "Startup" } },
+  profileRegisteredOn: { "profileRegisteredOn": { "$gte": from, "$lte": to } },
+  stateId: { "stateId": req.body.stateId },
+  districtId: { "districtId": req.body.districtId },
+  industries: { "industry._id": { $in: ind } },
+  sectors: { "sector._id": { $in: sect } },
+  badges: { "badges": { "$exists": true, "$type": 'array', "$ne": [] } }
+};
+const matchQueryArr = Object.keys(obj).filter(key => acceptedParams.includes(key)).map(key => obj[key])
+console.log(matchQueryArr);
+let sectorwiseCounts = await getSectorCounts(matchQueryArr);
+let output= sectorwiseCounts.filter(e=>(e._id!="Others" && e._id!="")); 
+  resp.send(output[0]);
+});
+
+
 router.get("/leadingSector", async (req, resp) => {
 
   let stateId = req.query.stateId;
@@ -210,6 +244,40 @@ router.get("/leadingSector", async (req, resp) => {
   resp.send(output[0]);
 
 });
+
+async function getSectorCounts(matchQuery='') {
+ 
+  const querySectorwiseCount = [
+    { $unwind:  { path: "$sector" } },
+    { "$match": {$and:matchQuery }},
+    { $group:   {  _id: "$sector.name", count: { $sum:1 } } },
+    { $sort:    { "count": -1 } }
+  ];
+
+  var prom = new Promise((resolve, rej) => {
+    try {
+      mongodb
+        .getDb()
+        .collection("digitalMapUser")
+        .aggregate(querySectorwiseCount).limit(5).toArray(async (err, result) => {
+          if (err) throw err;
+          let output = await result;
+          resolve(output);
+        });
+    } catch (err) {
+      console.error('sectorwiseCounts :: ' + err.message);
+    }
+  });
+  return Promise.all([prom])
+    .then((values) => {
+      //  console.log("All promises resolved - " + JSON.stringify(values));
+      return values[0];
+    })
+    .catch((reason) => {
+      console.log(reason);
+    });
+
+}
 async function getSectorWiseCounts(stateId='') {
  
   let matchQuery ={$and:[{"role":'Startup'},] }
