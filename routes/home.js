@@ -6,7 +6,8 @@ const moment = require("moment");
 const _ = require('lodash');
 const { map } = require("lodash");
 const e = require("express");
-const { isValidObjectId } = require("mongoose");
+const { isValidObjectId, Mongoose} = require("mongoose");
+const {ObjectId} = require('mongodb');
 
 const roleTypes = ["Startup", "Investor", "Accelerator", "Mentor", "GovernmentBody", "Incubator"];
 
@@ -30,20 +31,22 @@ router.post("/topNumbers", async (req, resp) => {
   const from = new Date(req.body.from);
   const to = new Date(req.body.to);
   var ObjectId = require('mongodb').ObjectId;
-  industries.map(e=>e=ObjectId(e));
-  console.log(industries);
+  const ind =industries.map(e=>e=ObjectId(e));
+  const sect =sectors.map(e=>e=ObjectId(e));
+  console.log(ind);
+  console.log(sect);
   //Building default query set for building final queries based on input parameters
   const obj = {
     profileRegisteredOn: { "profileRegisteredOn": { "$gte": from, "$lte": to } },
     stateId: { "stateId": req.body.stateId },
     districtId: { "districtId": req.body.districtId },
-    industries: { "industry._id": { $in: industries } },
-    sectors: { "sector._id": { $in: sectors } },
+    industries: { "industry._id": { $in: ind } },
+    sectors: { "sector._id": { $in: sect } },
     badges: { "badges": { "$exists": true, "$type": 'array', "$ne": [] } }
   }
 
   const matchQueryArr = Object.keys(obj).filter(key => acceptedParams.includes(key)).map(key => obj[key])
-  
+
   let facetMap = new Map();
   let projectMap = new Map();
   roleTypes.forEach(e =>{
@@ -64,6 +67,7 @@ router.post("/topNumbers", async (req, resp) => {
   };
   query.push({"$facet": facetQuery});
   query.push({"$project": projectQuery});
+  console.log(JSON.stringify(query))
   return executeQuery(resp,query);
 
 });
@@ -174,9 +178,7 @@ async function getSectorWiseCounts(stateId='') {
     });
 
 }
-function MyFunc(e) {
-  e= e.length;
-}
+
 function checkBody(param,acceptedParams,industries,sectors,badges) {
   if ((!_.isEmpty(param.from)) && (!_.isEmpty(param.to))) {
     if (moment(param.from, "YYYY-MM-DD", true).isValid() && moment(param.to, "YYYY-MM-DD", true).isValid()) {
