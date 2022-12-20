@@ -155,8 +155,8 @@ router.post("/startupCounts/:startupType", async (req, resp) => {
   }
   const from =(req.body.from);
   const to =(req.body.to);
-  const ind =industries.map(e=>e=ObjectId(e));
-  const sect =sectors.map(e=>e=ObjectId(e));
+  const ind =industries.map(e=>e=(e));
+  const sect =sectors.map(e=>e=(e));
   //Building default body set for building final queries based on input parameters
   const obj = {
     role: { "role": { "$eq": "Startup" } },
