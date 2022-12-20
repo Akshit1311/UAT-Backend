@@ -6,6 +6,7 @@ const moment = require("moment");
 const _ = require('lodash');
 const { map } = require("lodash");
 const e = require("express");
+const { isValidObjectId } = require("mongoose");
 
 const roleTypes = ["Startup", "Investor", "Accelerator", "Mentor", "GovernmentBody", "Incubator"];
 
@@ -28,7 +29,9 @@ router.post("/topNumbers", async (req, resp) => {
 
   const from = new Date(req.body.from);
   const to = new Date(req.body.to);
-
+  var ObjectId = require('mongodb').ObjectId;
+  industries.map(e=>e=ObjectId(e));
+  console.log(industries);
   //Building default query set for building final queries based on input parameters
   const obj = {
     profileRegisteredOn: { "profileRegisteredOn": { "$gte": from, "$lte": to } },
@@ -75,9 +78,14 @@ router.get("/startupCounts", async (req, resp) => {
   const industries = [];
   const sectors=[];
   const badges=[];
-  checkBody(req.query,acceptedParams,industries,sectors,badges)
-  const from = new Date(req.query.from);
-  const to = new Date(req.query.to);
+  const types=[];
+
+  checkBody(req.query,acceptedParams,industries,sectors,badges);
+  if (!_.isEmpty(req.query.type)) {
+    types.push(req.query.type);
+  }
+  const from = (req.query.from);
+  const to = (req.query.to);
 
   //Building default body set for building final queries based on input parameters
   const obj = {
@@ -94,8 +102,9 @@ router.get("/startupCounts", async (req, resp) => {
 
   let facetMap = new Map();
   let projectMap = new Map();
-  startupTypes.forEach(e => {
-    facetMap.set(e, [{ "$match": { [e]: { "$eq": true }, } }, { "$count": e }]);
+ 
+  startupTypes.filter(item => types.includes(item)).forEach(e => {
+    facetMap.set(e, [{ "$match": { [e]: { "$eq": "1" }, } }, { "$count": e }]);
     projectMap.set(e, { "$arrayElemAt": [`$${e}.${e}`, 0] });
   }
   );
@@ -114,7 +123,7 @@ router.get("/startupCounts", async (req, resp) => {
    };
   query.push({"$facet": facetQuery});
   query.push({"$project": projectQuery});
-console.log(query);
+
 return executeQuery(resp,query);
 
 });
@@ -129,7 +138,6 @@ router.get("/leadingSector", async (req, resp) => {
 });
 async function getSectorWiseCounts(stateId='') {
  
-
   let matchQuery ={$and:[{"role":'Startup'},] }
   if (stateId!=''){
     matchQuery={ $and:[{"stateId": { "$eq": stateId }},{"role":'Startup'},]  }
@@ -166,7 +174,9 @@ async function getSectorWiseCounts(stateId='') {
     });
 
 }
-
+function MyFunc(e) {
+  e= e.length;
+}
 function checkBody(param,acceptedParams,industries,sectors,badges) {
   if ((!_.isEmpty(param.from)) && (!_.isEmpty(param.to))) {
     if (moment(param.from, "YYYY-MM-DD", true).isValid() && moment(param.to, "YYYY-MM-DD", true).isValid()) {
