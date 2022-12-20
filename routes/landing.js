@@ -299,21 +299,26 @@ router.post("/filter/defaults", (req, resp) => {
     }
     var output = {};
     //console.log(body);
-    var allFilterableItems = JSON.parse(body).allFacets;
-    var allIndustriesArr = allFilterableItems[0].content;
-    var allSectorsArr = allFilterableItems[1].content;
-    var allStatesArr = allFilterableItems[3].content;
-    var allStagesArr = allFilterableItems[6].content;
-    var allBadgesArr = allFilterableItems[7].content;
+    let allFilterableItems = JSON.parse(body).allFacets;
+    // var allIndustriesArr = allFilterableItems[0].content;
+    // var allSectorsArr = allFilterableItems[1].content;
+    // var allStatesArr = allFilterableItems[3].content;
+    // var allStagesArr = allFilterableItems[6].content;
+    // var allBadgesArr = allFilterableItems[7].content;
 
-    var allDpiitCertifiedsArr = allFilterableItems[8].content;
-
-    output.states = allStatesArr.map(transformData);
-    output.sectors = allSectorsArr.map(transformData);
-    output.industries = allIndustriesArr.map(transformData);
-    output.stages = allStagesArr.map(transformData);
-    output.badges = allBadgesArr.map(transformData);
-    output.dpiitStatus = allDpiitCertifiedsArr.map(transformData);
+    // var allDpiitCertifiedsArr = allFilterableItems[8].content;
+   //All states
+    output.states = allFilterableItems[3].content.map(transformData);
+    //All Sectors
+    output.sectors = uniqByKeepLast(allFilterableItems[1].content.map(transformData),e=>e.value);
+    //All Industries
+    output.industries = allFilterableItems[0].content.map(transformData);
+    //All Stages
+    output.stages = allFilterableItems[6].content.map(transformData);
+    //All Badges
+    output.badges = allFilterableItems[7].content.map(transformData);
+    //All DPIIT certified
+    output.dpiitStatus = allFilterableItems[8].content.map(transformData);
     resp.send(output);
   });
 });
@@ -1226,6 +1231,15 @@ function transformCount_Mongo(data) {
   o.id = data._id.Role;
   o.value = data.count;
   return o;
+}
+
+//Returns an array of unique items keeping last occurrence of each item
+function uniqByKeepLast(data,key){
+  return [
+    ... new Map(
+      data.map(x=>[key[x],x])
+    ).values()
+  ]
 }
 
 async function getMyData(geoName) {
