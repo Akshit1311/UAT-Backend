@@ -145,11 +145,21 @@ router.post("/startupCounts/:startupType", async (req, resp) => {
   const sectors=[];
   const badges=[];
   const types=[];
+  const validStartupTypes=["allStartups","dpiitCertified", "showcased","seedFunded","fundOfFunds",
+  "seedFunded","patented","womenOwned", "leadingSector", "declaredRewards"];
 
   checkBody(req.body,acceptedParams,industries,sectors,badges);
   if (!_.isEmpty(req.params.startupType)) {
+    if (!(validStartupTypes.includes(req.params.startupType))) {
+      resp.send({error:"Invalid Startup Type"});
+    }else {
     types.push(req.params.startupType);
+    }
   }
+  else { //if no startup type passed then return everything
+    types = [...validStartupTypes];
+  }
+
   const from =new Date(req.body.from);
   const to =new Date(req.body.to);
   const ind =industries.map(e=>e=ObjectId(e));
