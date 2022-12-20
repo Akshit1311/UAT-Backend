@@ -11,7 +11,7 @@ const {ObjectId} = require('mongodb');
 
 const roleTypes = ["Startup", "Investor", "Accelerator", "Mentor", "GovernmentBody", "Incubator"];
 
-const startupTypes = ["dpiitCertified", "showcased","seedFunded","fundOfFunds",
+const startupTypes = ["allStartups","dpiitCertified", "showcased","seedFunded","fundOfFunds",
 "seedFunded","patented","womenOwned", "leadingSector", "declaredRewards"];
 
 //Get top numbers POST API
@@ -33,8 +33,7 @@ router.post("/topNumbers", async (req, resp) => {
   var ObjectId = require('mongodb').ObjectId;
   const ind =industries.map(e=>e=ObjectId(e));
   const sect =sectors.map(e=>e=ObjectId(e));
-  console.log(ind);
-  console.log(sect);
+
   //Building default query set for building final queries based on input parameters
   const obj = {
     profileRegisteredOn: { "profileRegisteredOn": { "$gte": from, "$lte": to } },
@@ -108,7 +107,13 @@ router.get("/startupCounts", async (req, resp) => {
   let projectMap = new Map();
  
   startupTypes.filter(item => types.includes(item)).forEach(e => {
-    facetMap.set(e, [{ "$match": { [e]: { "$eq": "1" }, } }, { "$count": e }]);
+  if (e=='allStartups') {
+      facetMap.set(e, [ { "$count": e }]);
+  }
+  else {
+  facetMap.set(e, [{ "$match": { [e]: { "$eq": "1" }, } }, { "$count": e }]);
+  }
+  
     projectMap.set(e, { "$arrayElemAt": [`$${e}.${e}`, 0] });
   }
   );
@@ -116,6 +121,69 @@ router.get("/startupCounts", async (req, resp) => {
   const as = "allStartups";
   facetMap.set(as, [ { "$count": as }]);
   projectMap.set(as, { "$arrayElemAt": [`$${as}.${as}`, 0] });
+
+  let facetQuery = Object.fromEntries(facetMap);
+ 
+  let projectQuery = Object.fromEntries(projectMap);
+  let query=[];
+  if (matchQueryArr.length) {
+    query.push({"$match": {"$and": matchQueryArr}
+    });
+   };
+  query.push({"$facet": facetQuery});
+  query.push({"$project": projectQuery});
+
+return executeQuery(resp,query);
+
+});
+router.post("/startupCounts/:startupType", async (req, resp) => {
+  //This Api returns count of Startups based on their types for whole country
+  //If passed stateId then the counts are for a particular state
+  //If passed district id then the counts are for a particular district
+  //if from and to dates are passed then count is shown for startups registered between the given dates
+
+  //Array to accept variable parameters e.g. stateId, industries, sectors, from and to dates
+  const acceptedParams = ["role"];
+  const industries = [];
+  const sectors=[];
+  const badges=[];
+  const types=[];
+
+  checkBody(req.body,acceptedParams,industries,sectors,badges);
+  if (!_.isEmpty(req.params.startupType)) {
+    types.push(req.params.startupType);
+  }
+  const from = (req.body.from);
+  const to = (req.body.to);
+  const ind =industries.map(e=>e=ObjectId(e));
+  const sect =sectors.map(e=>e=ObjectId(e));
+  //Building default body set for building final queries based on input parameters
+  const obj = {
+    role: { "role": { "$eq": "Startup" } },
+    profileRegisteredOn: { "profileRegisteredOn": { "$gte": from, "$lte": to } },
+    stateId: { "stateId": req.body.stateId },
+    districtId: { "districtId": req.body.districtId },
+    industries: { "industry._id": { $in: ind } },
+    sectors: { "sector._id": { $in: sect } },
+    badges: { "badges": { "$exists": true, "$type": 'array', "$ne": [] } }
+  }
+
+  const matchQueryArr = Object.keys(obj).filter(key => acceptedParams.includes(key)).map(key => obj[key])
+
+  let facetMap = new Map();
+  let projectMap = new Map();
+ 
+  startupTypes.filter(item => types.includes(item)).forEach(e => {
+    if (e=='allStartups') {
+        facetMap.set(e, [ { "$count": e }]);
+    }
+    else {
+    facetMap.set(e, [{ "$match": { [e]: { "$eq": "1" }, } }, { "$count": e }]);
+    }
+    projectMap.set(e, { "$arrayElemAt": [`$${e}.${e}`, 0] });
+    
+  }
+  );
 
   let facetQuery = Object.fromEntries(facetMap);
  
