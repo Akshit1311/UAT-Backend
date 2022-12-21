@@ -33,6 +33,7 @@ router.post("/topNumbers", async (req, resp) => {
   const from = new Date(req.body.from);
   const to = new Date(req.body.to);
   var ObjectId = require('mongodb').ObjectId;
+  console.log(industries)
   const ind =industries.map(e=>e=ObjectId(e));
   const sect =sectors.map(e=>e=ObjectId(e));
 
@@ -68,10 +69,10 @@ router.post("/topNumbers", async (req, resp) => {
       });
 
   };
-  console.log(matchQueryArr);
+
   query.push({"$facet": facetQuery});
   query.push({"$project": projectQuery});
-  // console.log(JSON.stringify(query))
+  console.log(JSON.stringify(query))
   return executeQuery(resp,query);
 
 });
@@ -332,7 +333,8 @@ async function getSectorWiseCounts(stateId='') {
 
 }
 
-function checkBody(param,acceptedParams,industries,sectors,stages,badges) {
+function checkBody(param,acceptedParams,states,industries,sectors,stages,badges) {
+ 
   if ((!_.isEmpty(param.from)) && (!_.isEmpty(param.to))) {
     if (moment(param.from, "YYYY-MM-DD", true).isValid() && moment(param.to, "YYYY-MM-DD", true).isValid()) {
       acceptedParams.push("profileRegisteredOn");
@@ -348,7 +350,7 @@ function checkBody(param,acceptedParams,industries,sectors,stages,badges) {
     acceptedParams.push("states");
 
     for (let state of param.states) {
-      industries.push(state);
+      states.push(state);
     }
   }
 
@@ -363,7 +365,7 @@ function checkBody(param,acceptedParams,industries,sectors,stages,badges) {
       industries.push(industry);
     }
   }
-
+  
   if (!_.isEmpty(param.sectors)) {
     acceptedParams.push("sectors");
 
