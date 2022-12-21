@@ -23,12 +23,13 @@ router.post("/topNumbers", async (req, resp) => {
 
   //Array to accept variable parameters e.g. stateId, industries, sectors, from and to dates
   const acceptedParams = [];
+  const states=[];
   const industries = [];
   const sectors=[];
   const stages=[];
   const badges=[];
-  checkBody(req.body,acceptedParams,industries,sectors,stages,badges);
-
+  checkBody(req.body,acceptedParams,states,industries,sectors,stages,badges);
+ 
   const from = new Date(req.body.from);
   const to = new Date(req.body.to);
   var ObjectId = require('mongodb').ObjectId;
@@ -38,7 +39,8 @@ router.post("/topNumbers", async (req, resp) => {
   //Building default query set for building final queries based on input parameters
   const obj = {
     profileRegisteredOn: { "profileRegisteredOn": { "$gte": from, "$lte": to } },
-    stateId: { "stateId": req.body.stateId },
+    states: { "stateId": states[0] },
+    // stateId: { "stateId": req.body.stateId },
     districtId: { "districtId": req.body.districtId },
     industries: { "industry._id": { $in: ind } },
     sectors: { "sector._id": { $in: sect } },
@@ -66,9 +68,10 @@ router.post("/topNumbers", async (req, resp) => {
       });
 
   };
+  console.log(matchQueryArr);
   query.push({"$facet": facetQuery});
   query.push({"$project": projectQuery});
-  console.log(JSON.stringify(query))
+  // console.log(JSON.stringify(query))
   return executeQuery(resp,query);
 
 });
@@ -145,6 +148,7 @@ router.post("/startupCounts/:startupType", async (req, resp) => {
 
   //Array to accept variable parameters e.g. stateId, industries, sectors, from and to dates
   const acceptedParams = ["role"];
+  const states=[];
   const industries = [];
   const sectors=[];
   const stages=[];
@@ -152,7 +156,7 @@ router.post("/startupCounts/:startupType", async (req, resp) => {
  
   let types = [...startupTypes];
 
-  checkBody(req.body,acceptedParams,industries,sectors,stages,badges);
+  checkBody(req.body,acceptedParams,states,industries,sectors,stages,badges);
   if (!_.isEmpty(req.params.startupType)) {
     if ((startupTypes.includes(req.params.startupType))) {
       types=startupTypes.filter(e=>e===req.params.startupType)
@@ -167,7 +171,8 @@ router.post("/startupCounts/:startupType", async (req, resp) => {
   const obj = {
     role: { "role": { "$eq": "Startup" } },
     profileRegisteredOn: { "profileRegisteredOn": { "$gte": from, "$lte": to } },
-    stateId: { "stateId": req.body.stateId },
+    states: { "stateId": states[0] },
+    // stateId: { "stateId": req.body.stateId },
     districtId: { "districtId": req.body.districtId },
     industries: { "industry._id": { $in: ind } },
     sectors: { "sector._id": { $in: sect } },
@@ -211,11 +216,12 @@ return executeQuery(resp,query);
 router.post("/leadingSector",async(req,resp)=>{
 //Array to accept variable parameters e.g. stateId, industries, sectors, from and to dates
 const acceptedParams = ["role"];
+const states=[];
 const industries = [];
 const sectors=[];
 const stages=[];
 const badges=[];
-checkBody(req.body,acceptedParams,industries,sectors,stages,badges);
+checkBody(req.body,acceptedParams,states,industries,sectors,stages,badges);
 
 //Convert to Date Format for comparison
 const from = new Date(req.body.from);
@@ -229,7 +235,8 @@ const sect =sectors.map(e=>e=ObjectId(e));
 const obj = {
   role: { "role": { "$eq": "Startup" } },
   profileRegisteredOn: { "profileRegisteredOn": { "$gte": from, "$lte": to } },
-  stateId: { "stateId": req.body.stateId },
+  states: { "stateId": states[0] },
+  // stateId: { "stateId": req.body.stateId },
   districtId: { "districtId": req.body.districtId },
   industries: { "industry._id": { $in: ind } },
   sectors: { "sector._id": { $in: sect } },
@@ -336,8 +343,13 @@ function checkBody(param,acceptedParams,industries,sectors,stages,badges) {
     }
   }
   
-  if (!_.isEmpty(param.stateId)) {
-    acceptedParams.push("stateId");
+
+  if (!_.isEmpty(param.states)) {
+    acceptedParams.push("states");
+
+    for (let state of param.states) {
+      industries.push(state);
+    }
   }
 
   if (!_.isEmpty(param.districtId)) {
