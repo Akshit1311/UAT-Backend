@@ -681,7 +681,7 @@ router.get("/startups/:from/:to", (req, resp) => {
   // #swagger.description = 'State-wise startups table'
 
   request(
-    "https://api-uat.startupindia.gov.in:443/sih/api/noauth/dpiit/services/list/states",
+    PROCESS.ENV.DPIIT_STATES,
     { json: true },
     (err, res, body) => {
       if (err) {
