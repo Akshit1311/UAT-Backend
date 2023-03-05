@@ -1,11 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const request = require("request");
-const _ = require('lodash');
+const _ = require("lodash");
 const fs = require("fs");
 const mongodb = require("../mongodb");
 const { resolve } = require("path");
-const ObjectId = require('mongodb').ObjectId;
+const ObjectId = require("mongodb").ObjectId;
 
 var stateStatistics = fs.readFileSync("./static/stateStatistics.json", "utf8");
 stateStatistics = JSON.parse(stateStatistics);
@@ -46,21 +46,23 @@ var dataCountMap = {
   Mentor: 0,
   Incubator: 0,
   Investor: 0,
-  Accelerator: 0, 
-  GovernmentBody: 0,  
+  Accelerator: 0,
+  GovernmentBody: 0,
 };
 
 var dataCountOthers = {
-  DpiitCertified  : 0,
+  DpiitCertified: 0,
   ShowcasedStartups: 0,
   SeedFunded: 0,
   FFS: 0,
   Patented: 0,
   WomenLed: 0,
   LeadingSector: 0,
-  DeclaredRewards:0
+  DeclaredRewards: 0,
 };
-router.get('/test', (req, res)=> { res.json({status: "ok"}) })
+router.get("/test", (req, res) => {
+  res.json({ status: "ok" });
+});
 router.get(
   "/statistics/:geographicalEntity/:entityId/:from/:to",
   (req, resp) => {
@@ -401,25 +403,34 @@ router.post(
     output.to = req.params.to;
 
     const from = new Date(req.params.from);
-    const to =  new Date(req.params.to);
+    const to = new Date(req.params.to);
 
-    if ((!_.isEmpty(req.params.from) && !_.isEmpty(req.params.to)) ||
-      moment(req.params.from, "YYYY-MM-DD", true).isValid() && moment(req.params.to, "YYYY-MM-DD", true).isValid()) {
-      console.log("Valid dates passed.")
+    if (
+      (!_.isEmpty(req.params.from) && !_.isEmpty(req.params.to)) ||
+      (moment(req.params.from, "YYYY-MM-DD", true).isValid() &&
+        moment(req.params.to, "YYYY-MM-DD", true).isValid())
+    ) {
+      console.log("Valid dates passed.");
     } else {
-      resp.status(500).json({ message: 'Invalid Date Format, expected in YYYY-MM-DD' });
+      resp
+        .status(500)
+        .json({ message: "Invalid Date Format, expected in YYYY-MM-DD" });
     }
 
     let subQuery = {};
     subQuery.profileRegisteredOn = {
-      "$lte": to,
-      "$gte": from
+      $lte: to,
+      $gte: from,
     };
-// resp.send(JSON.stringify(req.params));
+    // resp.send(JSON.stringify(req.params));
     var result = [];
     if (req.params.geographicalEntity == "country") {
       // Country - India level
-      let countryCounts = await populateMultiFieldCountsForCountryV3(from,to, req.body);
+      let countryCounts = await populateMultiFieldCountsForCountryV3(
+        from,
+        to,
+        req.body
+      );
 
       let map = new Map();
       // items = states
@@ -461,7 +472,9 @@ router.post(
 
         count.WomenLed = fillUndefined(val.statistics.WomenOwned);
         count.TaxExempted = fillUndefined(val.statistics.TaxExempted);
-        count.ShowcasedStartups = fillUndefined(val.statistics.ShowcasedStartups);
+        count.ShowcasedStartups = fillUndefined(
+          val.statistics.ShowcasedStartups
+        );
         count.SeedFundStartup = fillUndefined(val.statistics.SeedFunded);
         count.FFS = fillUndefined(val.statistics.FFS);
         count.DpiitCertified = fillUndefined(val.statistics.DpiitCertified);
@@ -479,13 +492,17 @@ router.post(
       }
       output.data = countsArr;
       resp.status(200).send(output);
-
     } else if (req.params.geographicalEntity == "state") {
       // State level
       let stateId = req.params.entityId;
       // console.log('stateId =',stateId);
 
-      let stateCounts = await populateMultiFieldCountsForStateV3(stateId, from, to, req.body);
+      let stateCounts = await populateMultiFieldCountsForStateV3(
+        stateId,
+        from,
+        to,
+        req.body
+      );
       // resp.send(JSON.stringify(stateCounts));
       let map = new Map();
       // items = districts
@@ -528,7 +545,9 @@ router.post(
 
         count.WomenLed = fillUndefined(val.statistics.WomenOwned);
         count.TaxExempted = fillUndefined(val.statistics.TaxExempted);
-        count.ShowcasedStartups = fillUndefined(val.statistics.ShowcasedStartups);
+        count.ShowcasedStartups = fillUndefined(
+          val.statistics.ShowcasedStartups
+        );
         count.SeedFundStartup = fillUndefined(val.statistics.SeedFunded);
         count.FFS = fillUndefined(val.statistics.FFS);
         count.DpiitCertified = fillUndefined(val.statistics.DpiitCertified);
@@ -552,67 +571,74 @@ router.post(
   }
 );
 
-router.get(
-  "/v2/statistics/allDistricts/:from/:to",
-  async (req, resp) => {
-    // #swagger.tags = ['Data Tables']
-    // #swagger.path = '/data/v2/statistics/allDistricts/{from}/{to}'
-    // #swagger.exmaple = '/data/v2/statistics/allDistricts/{from}/{to}'
-    // #swagger.description = 'District-wise data table for whole country'
-    let allIndiaDistrictStats = {};
-    allIndiaDistrictStats.from = new Date(req.params.from);
-    allIndiaDistrictStats.to = new Date(req.params.to);
-    allIndiaDistrictStats.max = JSON.parse(JSON.stringify(dataCountJson));
+router.get("/v2/statistics/allDistricts/:from/:to", async (req, resp) => {
+  // #swagger.tags = ['Data Tables']
+  // #swagger.path = '/data/v2/statistics/allDistricts/{from}/{to}'
+  // #swagger.exmaple = '/data/v2/statistics/allDistricts/{from}/{to}'
+  // #swagger.description = 'District-wise data table for whole country'
+  let allIndiaDistrictStats = {};
+  allIndiaDistrictStats.from = new Date(req.params.from);
+  allIndiaDistrictStats.to = new Date(req.params.to);
+  allIndiaDistrictStats.max = JSON.parse(JSON.stringify(dataCountJson));
 
-    if ((!_.isEmpty(req.params.from) && !_.isEmpty(req.params.to)) ||
-      moment(req.params.from, "YYYY-MM-DD", true).isValid() && moment(req.params.to, "YYYY-MM-DD", true).isValid()) {
-      console.log("Valid dates passed.")
-    } else {
-      resp.status(500).json({ message: 'Invalid Date Format, expected in YYYY-MM-DD' });
-    }
+  if (
+    (!_.isEmpty(req.params.from) && !_.isEmpty(req.params.to)) ||
+    (moment(req.params.from, "YYYY-MM-DD", true).isValid() &&
+      moment(req.params.to, "YYYY-MM-DD", true).isValid())
+  ) {
+    console.log("Valid dates passed.");
+  } else {
+    resp
+      .status(500)
+      .json({ message: "Invalid Date Format, expected in YYYY-MM-DD" });
+  }
 
-    // Country wide - District Level counts
-    let districtStats = await populateMultiFieldCountsForCountry(allIndiaDistrictStats.from, allIndiaDistrictStats.to);
+  // Country wide - District Level counts
+  let districtStats = await populateMultiFieldCountsForCountry(
+    allIndiaDistrictStats.from,
+    allIndiaDistrictStats.to
+  );
 
-    let map = new Map();
-    let items = Object.keys(districtStats);
-    for (let i = 0; i < items.length; i++) {
-      let key = items[i];
-      let v = districtStats[key].length ? districtStats[key][0] : [];
-      for (let j = 0; j < v.length; j++) {
-        let x = v[j];
-        let c = x.count;
-        x = x._id;
+  let map = new Map();
+  let items = Object.keys(districtStats);
+  for (let i = 0; i < items.length; i++) {
+    let key = items[i];
+    let v = districtStats[key].length ? districtStats[key][0] : [];
+    for (let j = 0; j < v.length; j++) {
+      let x = v[j];
+      let c = x.count;
+      x = x._id;
 
-        if (map.has(x.districtId)) {
-          let countData = map.get(x.districtId);
-          countData.statistics[key] = c;
-          map.set(x.districtId, countData);
-        } else {
-          let placeholder = JSON.parse(JSON.stringify(dataCountJson));
-          placeholder[key] = c;
-          let data = {};
-          data.districtId = x.districtId;
-          data.district = x.district;
-          data.stateId = x.stateId;
-          data.state = x.state;
-          data.statistics = placeholder;
-          map.set(x.districtId, data);
-        }
+      if (map.has(x.districtId)) {
+        let countData = map.get(x.districtId);
+        countData.statistics[key] = c;
+        map.set(x.districtId, countData);
+      } else {
+        let placeholder = JSON.parse(JSON.stringify(dataCountJson));
+        placeholder[key] = c;
+        let data = {};
+        data.districtId = x.districtId;
+        data.district = x.district;
+        data.stateId = x.stateId;
+        data.state = x.state;
+        data.statistics = placeholder;
+        map.set(x.districtId, data);
+      }
 
-        if (c > allIndiaDistrictStats.max[key]) {
-          allIndiaDistrictStats.max[key] = c;
-        }
+      if (c > allIndiaDistrictStats.max[key]) {
+        allIndiaDistrictStats.max[key] = c;
       }
     }
-
-    let distArr = [];
-    map.forEach(d => { distArr.push(d) });
-    allIndiaDistrictStats.data = distArr;
-
-    resp.status(200).send(allIndiaDistrictStats);
   }
-);
+
+  let distArr = [];
+  map.forEach((d) => {
+    distArr.push(d);
+  });
+  allIndiaDistrictStats.data = distArr;
+
+  resp.status(200).send(allIndiaDistrictStats);
+});
 
 router.get("/stateStatisticsLive/:from/:to", (req, resp) => {
   // #swagger.tags = ['Data Tables']
@@ -680,18 +706,14 @@ router.get("/startups/:from/:to", (req, resp) => {
   // #swagger.path = '/data/startups/{from}/{to}'
   // #swagger.description = 'State-wise startups table'
 
-  request(
-    PROCESS.ENV.DPIIT_STATES,
-    { json: true },
-    (err, res, body) => {
-      if (err) {
-        return console.log(err);
-      }
-      console.log(body);
-      console.log(res);
-      resp.send(res.body.data);
+  request(PROCESS.ENV.DPIIT_STATES, { json: true }, (err, res, body) => {
+    if (err) {
+      return console.log(err);
     }
-  );
+    console.log(body);
+    console.log(res);
+    resp.send(res.body.data);
+  });
 });
 
 router.get("/startup/:id", (req, resp) => {
@@ -734,29 +756,31 @@ async function populateWomenLedStartup(from, to) {
         .collection("digitalMapUser")
         .aggregate([
           {
-            "$match": {
-              "womenOwned": { "$eq": true },
-              "profileRegisteredOn": {
-                "$lte": (to),
-                "$gte": (from),
-              }
+            $match: {
+              womenOwned: { $eq: true },
+              profileRegisteredOn: {
+                $lte: to,
+                $gte: from,
+              },
             },
           },
           {
-            "$group": {
-              "_id": {
-                "StateId": "$stateId",
-              }, "count": { "$sum": 1 },
+            $group: {
+              _id: {
+                StateId: "$stateId",
+              },
+              count: { $sum: 1 },
             },
           },
-        ]).toArray(async (err, result) => {
+        ])
+        .toArray(async (err, result) => {
           if (err) throw err;
           let output = await processStatewiseResults(result);
           //console.log("populateWomenLedStartup :: Women Led startup data count - " + Object.keys(output));
           resolve(output);
         });
     } catch (err) {
-      console.error('populateWomenLedStartup :: ' + err.message);
+      console.error("populateWomenLedStartup :: " + err.message);
     }
   });
   return Promise.all([promWO])
@@ -777,29 +801,31 @@ async function populateTaxExemptedStartup(from, to) {
         .collection("digitalMapUser")
         .aggregate([
           {
-            "$match": {
-              "taxExempted": { "$eq": true },
-              "profileRegisteredOn": {
-                "$lte": (to),
-                "$gte": (from),
-              }
+            $match: {
+              taxExempted: { $eq: true },
+              profileRegisteredOn: {
+                $lte: to,
+                $gte: from,
+              },
             },
           },
           {
-            "$group": {
-              "_id": {
-                "StateId": "$stateId",
-              }, "count": { "$sum": 1 },
+            $group: {
+              _id: {
+                StateId: "$stateId",
+              },
+              count: { $sum: 1 },
             },
           },
-        ]).toArray(async (err, result) => {
+        ])
+        .toArray(async (err, result) => {
           if (err) throw err;
           let output = await processStatewiseResults(result);
           //console.log("populateTaxExemptedStartup :: Tax Exempted startup data count - " + Object.keys(output));
           resolve(output);
         });
     } catch (err) {
-      console.error('populateTaxExemptedStartup :: ' + err.message);
+      console.error("populateTaxExemptedStartup :: " + err.message);
     }
   });
   return Promise.all([promTX])
@@ -820,29 +846,31 @@ async function populateDpiitRecognizedStartup(from, to) {
         .collection("digitalMapUser")
         .aggregate([
           {
-            "$match": {
-              "dpiitCertified": { "$eq": true },
-              "profileRegisteredOn": {
-                "$lte": (to),
-                "$gte": (from),
-              }
+            $match: {
+              dpiitCertified: { $eq: true },
+              profileRegisteredOn: {
+                $lte: to,
+                $gte: from,
+              },
             },
           },
           {
-            "$group": {
-              "_id": {
-                "StateId": "$stateId",
-              }, "count": { "$sum": 1 },
+            $group: {
+              _id: {
+                StateId: "$stateId",
+              },
+              count: { $sum: 1 },
             },
           },
-        ]).toArray(async (err, result) => {
+        ])
+        .toArray(async (err, result) => {
           if (err) throw err;
           let output = await processStatewiseResults(result);
           //console.log("populateDpiitRecognizedStartup :: Dpiit Recognized startup data count - " + Object.keys(output));
           resolve(output);
         });
     } catch (err) {
-      console.error('populateDpiitRecognizedStartup :: ' + err.message);
+      console.error("populateDpiitRecognizedStartup :: " + err.message);
     }
   });
   return Promise.all([promDR])
@@ -863,29 +891,31 @@ async function populatePatentedStartup(from, to) {
         .collection("digitalMapUser")
         .aggregate([
           {
-            "$match": {
-              "patented": { "$eq": true },
-              "profileRegisteredOn": {
-                "$lte": (to),
-                "$gte": (from),
-              }
+            $match: {
+              patented: { $eq: true },
+              profileRegisteredOn: {
+                $lte: to,
+                $gte: from,
+              },
             },
           },
           {
-            "$group": {
-              "_id": {
-                "StateId": "$stateId",
-              }, "count": { "$sum": 1 },
+            $group: {
+              _id: {
+                StateId: "$stateId",
+              },
+              count: { $sum: 1 },
             },
           },
-        ]).toArray(async (err, result) => {
+        ])
+        .toArray(async (err, result) => {
           if (err) throw err;
           let output = await processStatewiseResults(result);
           //console.log("populatePatentedStartup :: Dpiit Recognized startup data count - " + Object.keys(output));
           resolve(output);
         });
     } catch (err) {
-      console.error('populatePatentedStartup :: ' + err.message);
+      console.error("populatePatentedStartup :: " + err.message);
     }
   });
   return Promise.all([promPT])
@@ -906,28 +936,30 @@ async function populateShowcasedStartup(from, to) {
         .collection("digitalMapUser")
         .aggregate([
           {
-            "$match": {
-              "showcased": { "$eq": true },
-              "profileRegisteredOn": {
-                "$lte":(to),
-                "$gte":(from),
-              }
+            $match: {
+              showcased: { $eq: true },
+              profileRegisteredOn: {
+                $lte: to,
+                $gte: from,
+              },
             },
           },
           {
-            "$group": {
-              "_id": {
-                "StateId": "$stateId",
-              }, "count": { "$sum": 1 },
+            $group: {
+              _id: {
+                StateId: "$stateId",
+              },
+              count: { $sum: 1 },
             },
           },
-        ]).toArray(async (err, result) => {
+        ])
+        .toArray(async (err, result) => {
           if (err) throw err;
           let output = await processStatewiseResults(result);
           resolve(output);
         });
     } catch (err) {
-      console.error('populateShowcasedStartup :: ' + err.message);
+      console.error("populateShowcasedStartup :: " + err.message);
     }
   });
   return Promise.all([promSC])
@@ -948,28 +980,30 @@ async function populateSeedFundedStartup(from, to) {
         .collection("digitalMapUser")
         .aggregate([
           {
-            "$match": {
-              "seedFunded": { "$eq": true },
-              "profileRegisteredOn": {
-                "$lte": (to),
-                "$gte": (from),
-              }
+            $match: {
+              seedFunded: { $eq: true },
+              profileRegisteredOn: {
+                $lte: to,
+                $gte: from,
+              },
             },
           },
           {
-            "$group": {
-              "_id": {
-                "StateId": "$stateId",
-              }, "count": { "$sum": 1 },
+            $group: {
+              _id: {
+                StateId: "$stateId",
+              },
+              count: { $sum: 1 },
             },
           },
-        ]).toArray(async (err, result) => {
+        ])
+        .toArray(async (err, result) => {
           if (err) throw err;
           let output = await processStatewiseResults(result);
           resolve(output);
         });
     } catch (err) {
-      console.error('populateSeedFundedStartup :: ' + err.message);
+      console.error("populateSeedFundedStartup :: " + err.message);
     }
   });
   return Promise.all([promSF])
@@ -990,28 +1024,30 @@ async function populateFundOfFundStartup(from, to) {
         .collection("digitalMapUser")
         .aggregate([
           {
-            "$match": {
-              "fundOfFunds": { "$eq": true },
-              "profileRegisteredOn": {
-                "$lte": (to),
-                "$gte": (from),
-              }
+            $match: {
+              fundOfFunds: { $eq: true },
+              profileRegisteredOn: {
+                $lte: to,
+                $gte: from,
+              },
             },
           },
           {
-            "$group": {
-              "_id": {
-                "StateId": "$stateId",
-              }, "count": { "$sum": 1 },
+            $group: {
+              _id: {
+                StateId: "$stateId",
+              },
+              count: { $sum: 1 },
             },
           },
-        ]).toArray(async (err, result) => {
+        ])
+        .toArray(async (err, result) => {
           if (err) throw err;
           let output = await processStatewiseResults(result);
           resolve(output);
         });
     } catch (err) {
-      console.error('populateFundOfFundStartup :: ' + err.message);
+      console.error("populateFundOfFundStartup :: " + err.message);
     }
   });
   return Promise.all([promFF])
@@ -1026,51 +1062,95 @@ async function populateFundOfFundStartup(from, to) {
 
 async function populateMultiFieldCountsForState(stateId, from, to) {
   from = new Date(from);
-	to = new Date(to);
+  to = new Date(to);
   let query = [
     {
-      "$facet": {
-        "WomenOwned": [
-          { "$match": { "womenOwned": { "$eq": true }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } } },
-          { "$count": "WomenOwned" }
+      $facet: {
+        WomenOwned: [
+          {
+            $match: {
+              womenOwned: { $eq: true },
+              stateId: { $eq: stateId },
+              profileRegisteredOn: { $lte: to, $gte: from },
+            },
+          },
+          { $count: "WomenOwned" },
         ],
-        "SeedFunded": [
-          { "$match": { "seedFunded": { "$eq": true }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } } },
-          { "$count": "SeedFunded" }
+        SeedFunded: [
+          {
+            $match: {
+              seedFunded: { $eq: true },
+              stateId: { $eq: stateId },
+              profileRegisteredOn: { $lte: to, $gte: from },
+            },
+          },
+          { $count: "SeedFunded" },
         ],
-        "TaxExempted": [
-          { "$match": { "taxExempted": { "$eq": true }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } } },
-          { "$count": "TaxExempted" }
+        TaxExempted: [
+          {
+            $match: {
+              taxExempted: { $eq: true },
+              stateId: { $eq: stateId },
+              profileRegisteredOn: { $lte: to, $gte: from },
+            },
+          },
+          { $count: "TaxExempted" },
         ],
-        "DpiitCertified": [
-          { "$match": { "dpiitCertified": { "$eq": true }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } } },
-          { "$count": "DpiitCertified" }
+        DpiitCertified: [
+          {
+            $match: {
+              dpiitCertified: { $eq: true },
+              stateId: { $eq: stateId },
+              profileRegisteredOn: { $lte: to, $gte: from },
+            },
+          },
+          { $count: "DpiitCertified" },
         ],
-        "FFS": [
-          { "$match": { "fundOfFunds": { "$eq": true }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } } },
-          { "$count": "FFS" }
+        FFS: [
+          {
+            $match: {
+              fundOfFunds: { $eq: true },
+              stateId: { $eq: stateId },
+              profileRegisteredOn: { $lte: to, $gte: from },
+            },
+          },
+          { $count: "FFS" },
         ],
-        "ShowcasedStartups": [
-          { "$match": { "showcased": { "$eq": true }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } } },
-          { "$count": "ShowcasedStartups" }
+        ShowcasedStartups: [
+          {
+            $match: {
+              showcased: { $eq: true },
+              stateId: { $eq: stateId },
+              profileRegisteredOn: { $lte: to, $gte: from },
+            },
+          },
+          { $count: "ShowcasedStartups" },
         ],
-        "PatentStartup": [
-          { "$match": { "patented": { "$eq": true }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } } },
-          { "$count": "PatentStartup" }
-        ]
-      }
+        PatentStartup: [
+          {
+            $match: {
+              patented: { $eq: true },
+              stateId: { $eq: stateId },
+              profileRegisteredOn: { $lte: to, $gte: from },
+            },
+          },
+          { $count: "PatentStartup" },
+        ],
+      },
     },
     {
-      "$project": {
-        "WomenOwned": { "$arrayElemAt": ["$WomenOwned.WomenOwned", 0] },
-        "SeedFunded": { "$arrayElemAt": ["$SeedFunded.SeedFunded", 0] },
-        "TaxExempted": { "$arrayElemAt": ["$TaxExempted.TaxExempted", 0] },
-        "DpiitCertified": { "$arrayElemAt": ["$DpiitCertified.DpiitCertified", 0] },
-        "ShowcasedStartups": { "$arrayElemAt": ["$ShowcasedStartups.ShowcasedStartups", 0] },
-        "PatentStartup": { "$arrayElemAt": ["$PatentStartup.PatentStartup", 0] },
-        "FFS": { "$arrayElemAt": ["$FFS.FFS", 0] }
-      }
-    }
+      $project: {
+        WomenOwned: { $arrayElemAt: ["$WomenOwned.WomenOwned", 0] },
+        SeedFunded: { $arrayElemAt: ["$SeedFunded.SeedFunded", 0] },
+        TaxExempted: { $arrayElemAt: ["$TaxExempted.TaxExempted", 0] },
+        DpiitCertified: { $arrayElemAt: ["$DpiitCertified.DpiitCertified", 0] },
+        ShowcasedStartups: {
+          $arrayElemAt: ["$ShowcasedStartups.ShowcasedStartups", 0],
+        },
+        PatentStartup: { $arrayElemAt: ["$PatentStartup.PatentStartup", 0] },
+        FFS: { $arrayElemAt: ["$FFS.FFS", 0] },
+      },
+    },
   ];
 
   var promAll = new Promise((resolve, rej) => {
@@ -1078,13 +1158,14 @@ async function populateMultiFieldCountsForState(stateId, from, to) {
       mongodb
         .getDb()
         .collection("digitalMapUser")
-        .aggregate(query).toArray(async (err, result) => {
+        .aggregate(query)
+        .toArray(async (err, result) => {
           if (err) throw err;
           let output = await result[0];
           resolve(output);
         });
     } catch (err) {
-      console.error('populateMultiFieldCountsForState :: ' + err.message);
+      console.error("populateMultiFieldCountsForState :: " + err.message);
     }
   });
   return Promise.all([promAll])
@@ -1099,86 +1180,310 @@ async function populateMultiFieldCountsForState(stateId, from, to) {
 
 async function populateMultiFieldCountsForStateV2(stateId, from, to) {
   from = new Date(from);
-	to = new Date(to);
-	let query = [
+  to = new Date(to);
+  let query = [
     {
-      "$facet": {
-        "Startup": [
-          { "$match": { "role": { "$eq": 'Startup' }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } } },
-          { "$group": { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum": 1  }, }, },
+      $facet: {
+        Startup: [
+          {
+            $match: {
+              role: { $eq: "Startup" },
+              stateId: { $eq: stateId },
+              profileRegisteredOn: { $lte: to, $gte: from },
+            },
+          },
+          {
+            $group: {
+              _id: {
+                stateId: "$stateId",
+                state: "$stateName",
+                districtId: "$districtId",
+                district: "$districtName",
+              },
+              count: { $sum: 1 },
+            },
+          },
         ],
-        "Investor": [
-          { "$match": { "role": { "$eq": 'Investor' }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } } },
-          { "$group": { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum": 1 }, }, },
+        Investor: [
+          {
+            $match: {
+              role: { $eq: "Investor" },
+              stateId: { $eq: stateId },
+              profileRegisteredOn: { $lte: to, $gte: from },
+            },
+          },
+          {
+            $group: {
+              _id: {
+                stateId: "$stateId",
+                state: "$stateName",
+                districtId: "$districtId",
+                district: "$districtName",
+              },
+              count: { $sum: 1 },
+            },
+          },
         ],
-        "Accelerator": [
-          { "$match": { "role": { "$eq": 'Accelerator' }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } } },
-          { "$group": { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum": 1  }, }, },
+        Accelerator: [
+          {
+            $match: {
+              role: { $eq: "Accelerator" },
+              stateId: { $eq: stateId },
+              profileRegisteredOn: { $lte: to, $gte: from },
+            },
+          },
+          {
+            $group: {
+              _id: {
+                stateId: "$stateId",
+                state: "$stateName",
+                districtId: "$districtId",
+                district: "$districtName",
+              },
+              count: { $sum: 1 },
+            },
+          },
         ],
-        "Individual": [
-          { "$match": { "role": { "$eq": 'Individual' }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } } },
-          { "$group": { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum": 1 }, }, },
+        Individual: [
+          {
+            $match: {
+              role: { $eq: "Individual" },
+              stateId: { $eq: stateId },
+              profileRegisteredOn: { $lte: to, $gte: from },
+            },
+          },
+          {
+            $group: {
+              _id: {
+                stateId: "$stateId",
+                state: "$stateName",
+                districtId: "$districtId",
+                district: "$districtName",
+              },
+              count: { $sum: 1 },
+            },
+          },
         ],
-        "Mentor": [
-          { "$match": { "role": { "$eq": 'Mentor' }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } } },
-          { "$group": { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum": 1 }, }, },
+        Mentor: [
+          {
+            $match: {
+              role: { $eq: "Mentor" },
+              stateId: { $eq: stateId },
+              profileRegisteredOn: { $lte: to, $gte: from },
+            },
+          },
+          {
+            $group: {
+              _id: {
+                stateId: "$stateId",
+                state: "$stateName",
+                districtId: "$districtId",
+                district: "$districtName",
+              },
+              count: { $sum: 1 },
+            },
+          },
         ],
-        "GovernmentBody": [
-          { "$match": { "role": { "$eq": 'GovernmentBody' }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } } },
-          { "$group": { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum": 1 }, }, },
+        GovernmentBody: [
+          {
+            $match: {
+              role: { $eq: "GovernmentBody" },
+              stateId: { $eq: stateId },
+              profileRegisteredOn: { $lte: to, $gte: from },
+            },
+          },
+          {
+            $group: {
+              _id: {
+                stateId: "$stateId",
+                state: "$stateName",
+                districtId: "$districtId",
+                district: "$districtName",
+              },
+              count: { $sum: 1 },
+            },
+          },
         ],
-        "Incubator": [
-          { "$match": { "role": { "$eq": 'Incubator' }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } } },
-          { "$group": { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum": 1 }, }, },
+        Incubator: [
+          {
+            $match: {
+              role: { $eq: "Incubator" },
+              stateId: { $eq: stateId },
+              profileRegisteredOn: { $lte: to, $gte: from },
+            },
+          },
+          {
+            $group: {
+              _id: {
+                stateId: "$stateId",
+                state: "$stateName",
+                districtId: "$districtId",
+                district: "$districtName",
+              },
+              count: { $sum: 1 },
+            },
+          },
         ],
-        "WomenOwned": [
-          { "$match": { "womenOwned": { "$eq": true }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } } },
-          { "$group": { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum": 1 }, }, },
+        WomenOwned: [
+          {
+            $match: {
+              womenOwned: { $eq: true },
+              stateId: { $eq: stateId },
+              profileRegisteredOn: { $lte: to, $gte: from },
+            },
+          },
+          {
+            $group: {
+              _id: {
+                stateId: "$stateId",
+                state: "$stateName",
+                districtId: "$districtId",
+                district: "$districtName",
+              },
+              count: { $sum: 1 },
+            },
+          },
         ],
-        "SeedFunded": [
-          { "$match": { "seedFunded": { "$eq": true }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } } },
-          { "$group": { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum": 1 }, }, },
+        SeedFunded: [
+          {
+            $match: {
+              seedFunded: { $eq: true },
+              stateId: { $eq: stateId },
+              profileRegisteredOn: { $lte: to, $gte: from },
+            },
+          },
+          {
+            $group: {
+              _id: {
+                stateId: "$stateId",
+                state: "$stateName",
+                districtId: "$districtId",
+                district: "$districtName",
+              },
+              count: { $sum: 1 },
+            },
+          },
         ],
-        "TaxExempted": [
-          { "$match": { "taxExempted": { "$eq": true }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } } },
-          { "$group": { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum": 1 }, }, },
+        TaxExempted: [
+          {
+            $match: {
+              taxExempted: { $eq: true },
+              stateId: { $eq: stateId },
+              profileRegisteredOn: { $lte: to, $gte: from },
+            },
+          },
+          {
+            $group: {
+              _id: {
+                stateId: "$stateId",
+                state: "$stateName",
+                districtId: "$districtId",
+                district: "$districtName",
+              },
+              count: { $sum: 1 },
+            },
+          },
         ],
-        "DpiitCertified": [
-          { "$match": { "dpiitCertified": { "$eq": true }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } } },
-          { "$group": { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum": 1 }, }, },
+        DpiitCertified: [
+          {
+            $match: {
+              dpiitCertified: { $eq: true },
+              stateId: { $eq: stateId },
+              profileRegisteredOn: { $lte: to, $gte: from },
+            },
+          },
+          {
+            $group: {
+              _id: {
+                stateId: "$stateId",
+                state: "$stateName",
+                districtId: "$districtId",
+                district: "$districtName",
+              },
+              count: { $sum: 1 },
+            },
+          },
         ],
-        "FFS": [
-          { "$match": { "fundOfFunds": { "$eq": true }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } } },
-          { "$group": { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum": 1 }, }, },
+        FFS: [
+          {
+            $match: {
+              fundOfFunds: { $eq: true },
+              stateId: { $eq: stateId },
+              profileRegisteredOn: { $lte: to, $gte: from },
+            },
+          },
+          {
+            $group: {
+              _id: {
+                stateId: "$stateId",
+                state: "$stateName",
+                districtId: "$districtId",
+                district: "$districtName",
+              },
+              count: { $sum: 1 },
+            },
+          },
         ],
-        "ShowcasedStartups": [
-          { "$match": { "showcased": { "$eq": true }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } } },
-          { "$group": { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum": 1 }, }, },
+        ShowcasedStartups: [
+          {
+            $match: {
+              showcased: { $eq: true },
+              stateId: { $eq: stateId },
+              profileRegisteredOn: { $lte: to, $gte: from },
+            },
+          },
+          {
+            $group: {
+              _id: {
+                stateId: "$stateId",
+                state: "$stateName",
+                districtId: "$districtId",
+                district: "$districtName",
+              },
+              count: { $sum: 1 },
+            },
+          },
         ],
-        "PatentStartup": [
-          { "$match": { "patented": { "$eq": true }, "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } } },
-          { "$group": { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum": 1 }, }, },
-        ]
-      }
+        PatentStartup: [
+          {
+            $match: {
+              patented: { $eq: true },
+              stateId: { $eq: stateId },
+              profileRegisteredOn: { $lte: to, $gte: from },
+            },
+          },
+          {
+            $group: {
+              _id: {
+                stateId: "$stateId",
+                state: "$stateName",
+                districtId: "$districtId",
+                district: "$districtName",
+              },
+              count: { $sum: 1 },
+            },
+          },
+        ],
+      },
     },
     {
-      "$project": {
-        "Startup": ["$Startup"],
-        "Investor": ["$Investor"],
-        "Accelerator": ["$Accelerator"],
-        "Individual": ["$Individual"],
-        "Mentor": ["$Mentor"],
-        "GovernmentBody": ["$GovernmentBody"],
-        "Incubator": ["$Incubator"],
-        "WomenOwned": ["$WomenOwned"],
-        "SeedFunded": ["$SeedFunded"],
-        "TaxExempted": ["$TaxExempted"],
-        "DpiitCertified": ["$DpiitCertified"],
-        "ShowcasedStartups": ["$ShowcasedStartups"],
-        "PatentStartup": ["$PatentStartup"],
-        "FFS": ["$FFS"]
-      }
-    }
+      $project: {
+        Startup: ["$Startup"],
+        Investor: ["$Investor"],
+        Accelerator: ["$Accelerator"],
+        Individual: ["$Individual"],
+        Mentor: ["$Mentor"],
+        GovernmentBody: ["$GovernmentBody"],
+        Incubator: ["$Incubator"],
+        WomenOwned: ["$WomenOwned"],
+        SeedFunded: ["$SeedFunded"],
+        TaxExempted: ["$TaxExempted"],
+        DpiitCertified: ["$DpiitCertified"],
+        ShowcasedStartups: ["$ShowcasedStartups"],
+        PatentStartup: ["$PatentStartup"],
+        FFS: ["$FFS"],
+      },
+    },
   ];
 
   var promAll = new Promise((resolve, rej) => {
@@ -1186,13 +1491,14 @@ async function populateMultiFieldCountsForStateV2(stateId, from, to) {
       mongodb
         .getDb()
         .collection("digitalMapUser")
-        .aggregate(query).toArray(async (err, result) => {
+        .aggregate(query)
+        .toArray(async (err, result) => {
           if (err) throw err;
           let output = await result[0];
           resolve(output);
         });
     } catch (err) {
-      console.error('populateMultiFieldCountsForState :: ' + err.message);
+      console.error("populateMultiFieldCountsForState :: " + err.message);
     }
   });
   return Promise.all([promAll])
@@ -1206,131 +1512,275 @@ async function populateMultiFieldCountsForStateV2(stateId, from, to) {
 }
 
 async function populateMultiFieldCountsForStateV3(stateId, from, to, body) {
+  const matchQuery = {
+    $match: {
+      stateId: { $eq: stateId },
+      profileRegisteredOn: { $lte: to, $gte: from },
+    },
+  };
 
-  const matchQuery =   { "$match": { "stateId": { "$eq": stateId }, "profileRegisteredOn": { "$lte": (to), "$gte": (from), } } };
- 
-  let startupQ = { "role": { "$eq": 'Startup' } };
+  let startupQ = { role: { $eq: "Startup" } };
   startupQ = addAdditionalMatchConditions(startupQ, body);
 
-  let investorQ = { "role": { "$eq": 'Investor' } };
+  let investorQ = { role: { $eq: "Investor" } };
   investorQ = addAdditionalMatchConditions(investorQ, body);
 
-  let acceleratorQ = { "role": { "$eq": 'Accelerator' } };
+  let acceleratorQ = { role: { $eq: "Accelerator" } };
   acceleratorQ = addAdditionalMatchConditions(acceleratorQ, body);
 
-  let individualQ = { "role": { "$eq": 'Individual' } };
+  let individualQ = { role: { $eq: "Individual" } };
   individualQ = addAdditionalMatchConditions(individualQ, body);
 
-  let mentorQ = { "role": { "$eq": 'Mentor' } };
+  let mentorQ = { role: { $eq: "Mentor" } };
   mentorQ = addAdditionalMatchConditions(mentorQ, body);
 
-  let govBodyQ = { "role": { "$eq": 'GovernmentBody' } };
+  let govBodyQ = { role: { $eq: "GovernmentBody" } };
   govBodyQ = addAdditionalMatchConditions(govBodyQ, body);
 
-  let incubatorQ = { "role": { "$eq": 'Incubator' } };
+  let incubatorQ = { role: { $eq: "Incubator" } };
   incubatorQ = addAdditionalMatchConditions(incubatorQ, body);
 
-  let womenOwnedQ = { "womenOwned": { "$eq": true } };
+  let womenOwnedQ = { womenOwned: { $eq: true } };
   womenOwnedQ = addAdditionalMatchConditions(womenOwnedQ, body);
 
-  let seedFundedQ = { "seedFunded": { "$eq": true } };
+  let seedFundedQ = { seedFunded: { $eq: true } };
   seedFundedQ = addAdditionalMatchConditions(seedFundedQ, body);
 
-  let taxExemptedQ = { "taxExempted": { "$eq": true } };
+  let taxExemptedQ = { taxExempted: { $eq: true } };
   taxExemptedQ = addAdditionalMatchConditions(taxExemptedQ, body);
 
-  let dpiitCertifiedQ = { "dpiitCertified": { "$eq": true } };
+  let dpiitCertifiedQ = { dpiitCertified: { $eq: true } };
   dpiitCertifiedQ = addAdditionalMatchConditions(dpiitCertifiedQ, body);
 
-  let ffsQ = { "fundOfFunds": { "$eq": true } };
+  let ffsQ = { fundOfFunds: { $eq: true } };
   ffsQ = addAdditionalMatchConditions(ffsQ, body);
 
-  let showcasedQ = { "showcased": { "$eq": true } };
+  let showcasedQ = { showcased: { $eq: true } };
   showcasedQ = addAdditionalMatchConditions(showcasedQ, body);
 
-  let patentedQ = { "patented": { "$eq": true } };
+  let patentedQ = { patented: { $eq: true } };
   patentedQ = addAdditionalMatchConditions(patentedQ, body);
 
   let query = [
     matchQuery,
     {
-      "$facet": {
-        "Startup": [
-          { "$match": startupQ },
-          { "$group": { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum":1 }, }, },
+      $facet: {
+        Startup: [
+          { $match: startupQ },
+          {
+            $group: {
+              _id: {
+                stateId: "$stateId",
+                state: "$stateName",
+                districtId: "$districtId",
+                district: "$districtName",
+              },
+              count: { $sum: 1 },
+            },
+          },
         ],
-        "Investor": [
-          { "$match": investorQ },
-          { "$group": { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum":1 }, }, },
+        Investor: [
+          { $match: investorQ },
+          {
+            $group: {
+              _id: {
+                stateId: "$stateId",
+                state: "$stateName",
+                districtId: "$districtId",
+                district: "$districtName",
+              },
+              count: { $sum: 1 },
+            },
+          },
         ],
-        "Accelerator": [
-          { "$match": acceleratorQ },
-          { "$group": { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum": 1 }, }, },
+        Accelerator: [
+          { $match: acceleratorQ },
+          {
+            $group: {
+              _id: {
+                stateId: "$stateId",
+                state: "$stateName",
+                districtId: "$districtId",
+                district: "$districtName",
+              },
+              count: { $sum: 1 },
+            },
+          },
         ],
-        "Individual": [
-          { "$match": individualQ },
-          { "$group": { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum": 1}, }, },
+        Individual: [
+          { $match: individualQ },
+          {
+            $group: {
+              _id: {
+                stateId: "$stateId",
+                state: "$stateName",
+                districtId: "$districtId",
+                district: "$districtName",
+              },
+              count: { $sum: 1 },
+            },
+          },
         ],
-        "Mentor": [
-          { "$match": mentorQ },
-          { "$group": { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum": 1 }, }, },
+        Mentor: [
+          { $match: mentorQ },
+          {
+            $group: {
+              _id: {
+                stateId: "$stateId",
+                state: "$stateName",
+                districtId: "$districtId",
+                district: "$districtName",
+              },
+              count: { $sum: 1 },
+            },
+          },
         ],
-        "GovernmentBody": [
-          { "$match": govBodyQ },
-          { "$group": { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum": 1 }, }, },
+        GovernmentBody: [
+          { $match: govBodyQ },
+          {
+            $group: {
+              _id: {
+                stateId: "$stateId",
+                state: "$stateName",
+                districtId: "$districtId",
+                district: "$districtName",
+              },
+              count: { $sum: 1 },
+            },
+          },
         ],
-        "Incubator": [
-          { "$match": incubatorQ },
-          { "$group": { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum": 1 }, }, },
+        Incubator: [
+          { $match: incubatorQ },
+          {
+            $group: {
+              _id: {
+                stateId: "$stateId",
+                state: "$stateName",
+                districtId: "$districtId",
+                district: "$districtName",
+              },
+              count: { $sum: 1 },
+            },
+          },
         ],
-        "WomenOwned": [
-          { "$match": womenOwnedQ },
-          { "$group": { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum": 1}, }, },
+        WomenOwned: [
+          { $match: womenOwnedQ },
+          {
+            $group: {
+              _id: {
+                stateId: "$stateId",
+                state: "$stateName",
+                districtId: "$districtId",
+                district: "$districtName",
+              },
+              count: { $sum: 1 },
+            },
+          },
         ],
-        "SeedFunded": [
-          { "$match": seedFundedQ },
-          { "$group": { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum": 1 }, }, },
+        SeedFunded: [
+          { $match: seedFundedQ },
+          {
+            $group: {
+              _id: {
+                stateId: "$stateId",
+                state: "$stateName",
+                districtId: "$districtId",
+                district: "$districtName",
+              },
+              count: { $sum: 1 },
+            },
+          },
         ],
-        "TaxExempted": [
-          { "$match": taxExemptedQ },
-          { "$group": { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum": 1 }, }, },
+        TaxExempted: [
+          { $match: taxExemptedQ },
+          {
+            $group: {
+              _id: {
+                stateId: "$stateId",
+                state: "$stateName",
+                districtId: "$districtId",
+                district: "$districtName",
+              },
+              count: { $sum: 1 },
+            },
+          },
         ],
-        "DpiitCertified": [
-          { "$match": dpiitCertifiedQ },
-          { "$group": { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum": 1 }, }, },
+        DpiitCertified: [
+          { $match: dpiitCertifiedQ },
+          {
+            $group: {
+              _id: {
+                stateId: "$stateId",
+                state: "$stateName",
+                districtId: "$districtId",
+                district: "$districtName",
+              },
+              count: { $sum: 1 },
+            },
+          },
         ],
-        "FFS": [
-          { "$match": ffsQ },
-          { "$group": { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum": 1 }, }, },
+        FFS: [
+          { $match: ffsQ },
+          {
+            $group: {
+              _id: {
+                stateId: "$stateId",
+                state: "$stateName",
+                districtId: "$districtId",
+                district: "$districtName",
+              },
+              count: { $sum: 1 },
+            },
+          },
         ],
-        "ShowcasedStartups": [
-          { "$match": showcasedQ },
-          { "$group": { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum": 1 }, }, },
+        ShowcasedStartups: [
+          { $match: showcasedQ },
+          {
+            $group: {
+              _id: {
+                stateId: "$stateId",
+                state: "$stateName",
+                districtId: "$districtId",
+                district: "$districtName",
+              },
+              count: { $sum: 1 },
+            },
+          },
         ],
-        "PatentStartup": [
-          { "$match": patentedQ },
-          { "$group": { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum": 1 }, }, },
-        ]
-      }
+        PatentStartup: [
+          { $match: patentedQ },
+          {
+            $group: {
+              _id: {
+                stateId: "$stateId",
+                state: "$stateName",
+                districtId: "$districtId",
+                district: "$districtName",
+              },
+              count: { $sum: 1 },
+            },
+          },
+        ],
+      },
     },
     {
-      "$project": {
-        "Startup": ["$Startup"],
-        "Investor": ["$Investor"],
-        "Accelerator": ["$Accelerator"],
-        "Individual": ["$Individual"],
-        "Mentor": ["$Mentor"],
-        "GovernmentBody": ["$GovernmentBody"],
-        "Incubator": ["$Incubator"],
-        "WomenOwned": ["$WomenOwned"],
-        "SeedFunded": ["$SeedFunded"],
-        "TaxExempted": ["$TaxExempted"],
-        "DpiitCertified": ["$DpiitCertified"],
-        "ShowcasedStartups": ["$ShowcasedStartups"],
-        "PatentStartup": ["$PatentStartup"],
-        "FFS": ["$FFS"]
-      }
-    }
+      $project: {
+        Startup: ["$Startup"],
+        Investor: ["$Investor"],
+        Accelerator: ["$Accelerator"],
+        Individual: ["$Individual"],
+        Mentor: ["$Mentor"],
+        GovernmentBody: ["$GovernmentBody"],
+        Incubator: ["$Incubator"],
+        WomenOwned: ["$WomenOwned"],
+        SeedFunded: ["$SeedFunded"],
+        TaxExempted: ["$TaxExempted"],
+        DpiitCertified: ["$DpiitCertified"],
+        ShowcasedStartups: ["$ShowcasedStartups"],
+        PatentStartup: ["$PatentStartup"],
+        FFS: ["$FFS"],
+      },
+    },
   ];
 
   let promAllV3 = new Promise((resolve, rej) => {
@@ -1338,13 +1788,14 @@ async function populateMultiFieldCountsForStateV3(stateId, from, to, body) {
       mongodb
         .getDb()
         .collection("digitalMapUser")
-        .aggregate(query).toArray(async (err, result) => {
+        .aggregate(query)
+        .toArray(async (err, result) => {
           if (err) throw err;
           let output = await result[0];
           resolve(output);
         });
     } catch (err) {
-      console.error('populateMultiFieldCountsForStateV3 :: ' + err.message);
+      console.error("populateMultiFieldCountsForStateV3 :: " + err.message);
     }
   });
   return Promise.all([promAllV3])
@@ -1358,150 +1809,150 @@ async function populateMultiFieldCountsForStateV3(stateId, from, to, body) {
 }
 
 async function populateMultiFieldCountsForCountryV3(from, to, body) {
- 
-  let matchQuery = {"profileRegisteredOn": { "$lte": (to), "$gte": (from), }};
-  matchQuery=addAdditionalMatchConditions(matchQuery, body);
-  const groupQuery = { "_id": { "stateId": "$stateId", "state": "$stateName" }, "count": { "$sum": 1 }, };
-  let startupQ = { "role": { "$eq": 'Startup' } };
+  let matchQuery = { profileRegisteredOn: { $lte: to, $gte: from } };
+  matchQuery = addAdditionalMatchConditions(matchQuery, body);
+  const groupQuery = {
+    _id: { stateId: "$stateId", state: "$stateName" },
+    count: { $sum: 1 },
+  };
+  let startupQ = { role: { $eq: "Startup" } };
   // startupQ = addAdditionalMatchConditions(startupQ, body);
   // console.log("start");
   // console.log(startupQ);
 
-  let investorQ = { "role": { "$eq": 'Investor' } };
+  let investorQ = { role: { $eq: "Investor" } };
   // investorQ = addAdditionalMatchConditions(investorQ, body);
 
-  let acceleratorQ = { "role": { "$eq": 'Accelerator' } };
+  let acceleratorQ = { role: { $eq: "Accelerator" } };
   // acceleratorQ = addAdditionalMatchConditions(acceleratorQ, body);
 
-  let individualQ = { "role": { "$eq": 'Individual' } };
+  let individualQ = { role: { $eq: "Individual" } };
   // individualQ = addAdditionalMatchConditions(individualQ, body);
 
-  let mentorQ = { "role": { "$eq": 'Mentor' } };
+  let mentorQ = { role: { $eq: "Mentor" } };
   // mentorQ = addAdditionalMatchConditions(mentorQ, body);
 
-  let govBodyQ = { "role": { "$eq": 'GovernmentBody' } };
+  let govBodyQ = { role: { $eq: "GovernmentBody" } };
   // govBodyQ = addAdditionalMatchConditions(govBodyQ, body);
 
-  let incubatorQ = { "role": { "$eq": 'Incubator' } };
+  let incubatorQ = { role: { $eq: "Incubator" } };
   // incubatorQ = addAdditionalMatchConditions(incubatorQ, body);
 
-  let womenOwnedQ = { "womenOwned": { "$eq": true } };
+  let womenOwnedQ = { womenOwned: { $eq: true } };
   // womenOwnedQ = addAdditionalMatchConditions(womenOwnedQ, body);
 
-  let seedFundedQ = { "seedFunded": { "$eq": true } };
+  let seedFundedQ = { seedFunded: { $eq: true } };
   // seedFundedQ = addAdditionalMatchConditions(seedFundedQ, body);
 
-  let taxExemptedQ = { "taxExempted": { "$eq": true } };
+  let taxExemptedQ = { taxExempted: { $eq: true } };
   // taxExemptedQ = addAdditionalMatchConditions(taxExemptedQ, body);
 
-  let dpiitCertifiedQ = { "dpiitCertified": { "$eq": true } };
+  let dpiitCertifiedQ = { dpiitCertified: { $eq: true } };
   // dpiitCertifiedQ = addAdditionalMatchConditions(dpiitCertifiedQ, body);
 
-  let ffsQ = { "fundOfFunds": { "$eq": true } };
+  let ffsQ = { fundOfFunds: { $eq: true } };
   // ffsQ = addAdditionalMatchConditions(ffsQ, body);
 
-  let showcasedQ = { "showcased": { "$eq": true } };
+  let showcasedQ = { showcased: { $eq: true } };
   // showcasedQ = addAdditionalMatchConditions(showcasedQ, body);
 
-  let patentedQ = { "patented": { "$eq": true } };
+  let patentedQ = { patented: { $eq: true } };
   // patentedQ = addAdditionalMatchConditions(patentedQ, body);
- 
+
   let query = [
-    {"$match": matchQuery},
+    { $match: matchQuery },
     {
-      "$facet": {
-        "Startup": [
-          { "$match": startupQ },
-          { "$group": groupQuery , },
-        ],
-        "Investor": [
-          { "$match": investorQ },
-          { "$group": groupQuery, },
-        ],
-        "Accelerator": [
-          { "$match": acceleratorQ },
-          { "$group": groupQuery, },
-        ],
-        "Individual": [
-          { "$match": individualQ },
-          { "$group": groupQuery, },
-        ],
-        "Mentor": [
-          { "$match": mentorQ },
-          { "$group": groupQuery, },
-        ],
-        "GovernmentBody": [
-          { "$match": govBodyQ },
-          { "$group": groupQuery, },
-        ],
-        "Incubator": [
-          { "$match": incubatorQ },
-          { "$group": groupQuery, },
-        ],
-        "WomenOwned": [
-          { "$match": womenOwnedQ },
-          { "$group": groupQuery, },
-        ],
-        "SeedFunded": [
-          { "$match": seedFundedQ },
-          { "$group": groupQuery, },
-        ],
-        "TaxExempted": [
-          { "$match": taxExemptedQ },
-          { "$group": groupQuery, },
-        ],
-        "DpiitCertified": [
-          { "$match": dpiitCertifiedQ },
-          { "$group": groupQuery, },
-        ],
-        "FFS": [
-          { "$match": ffsQ },
-          { "$group": groupQuery, },
-        ],
-        "ShowcasedStartups": [
-          { "$match": showcasedQ },
-          { "$group": groupQuery, },
-        ],
-        "PatentStartup": [
-          { "$match": patentedQ },
-          { "$group": groupQuery, },
-        ]
-      }
+      $facet: {
+        Startup: [{ $match: startupQ }, { $group: groupQuery }],
+        // "Investor": [
+        //   { "$match": investorQ },
+        //   { "$group": groupQuery, },
+        // ],
+        // "Accelerator": [
+        //   { "$match": acceleratorQ },
+        //   { "$group": groupQuery, },
+        // ],
+        // "Individual": [
+        //   { "$match": individualQ },
+        //   { "$group": groupQuery, },
+        // ],
+        // "Mentor": [
+        //   { "$match": mentorQ },
+        //   { "$group": groupQuery, },
+        // ],
+        // "GovernmentBody": [
+        //   { "$match": govBodyQ },
+        //   { "$group": groupQuery, },
+        // ],
+        // "Incubator": [
+        //   { "$match": incubatorQ },
+        //   { "$group": groupQuery, },
+        // ],
+        // "WomenOwned": [
+        //   { "$match": womenOwnedQ },
+        //   { "$group": groupQuery, },
+        // ],
+        // "SeedFunded": [
+        //   { "$match": seedFundedQ },
+        //   { "$group": groupQuery, },
+        // ],
+        // "TaxExempted": [
+        //   { "$match": taxExemptedQ },
+        //   { "$group": groupQuery, },
+        // ],
+        // "DpiitCertified": [
+        //   { "$match": dpiitCertifiedQ },
+        //   { "$group": groupQuery, },
+        // ],
+        // "FFS": [
+        //   { "$match": ffsQ },
+        //   { "$group": groupQuery, },
+        // ],
+        // "ShowcasedStartups": [
+        //   { "$match": showcasedQ },
+        //   { "$group": groupQuery, },
+        // ],
+        // "PatentStartup": [
+        //   { "$match": patentedQ },
+        //   { "$group": groupQuery, },
+        // ]
+      },
     },
     {
-      "$project": {
-        "Startup": ["$Startup"],
-        "Investor": ["$Investor"],
-        "Accelerator": ["$Accelerator"],
-        "Individual": ["$Individual"],
-        "Mentor": ["$Mentor"],
-        "GovernmentBody": ["$GovernmentBody"],
-        "Incubator": ["$Incubator"],
-        "WomenOwned": ["$WomenOwned"],
-        "SeedFunded": ["$SeedFunded"],
-        "TaxExempted": ["$TaxExempted"],
-        "DpiitCertified": ["$DpiitCertified"],
-        "ShowcasedStartups": ["$ShowcasedStartups"],
-        "PatentStartup": ["$PatentStartup"],
-        "FFS": ["$FFS"]
-      }
-    }
+      $project: {
+        Startup: ["$Startup"],
+        // "Investor": ["$Investor"],
+        // "Accelerator": ["$Accelerator"],
+        // "Individual": ["$Individual"],
+        // "Mentor": ["$Mentor"],
+        // "GovernmentBody": ["$GovernmentBody"],
+        // "Incubator": ["$Incubator"],
+        // "WomenOwned": ["$WomenOwned"],
+        // "SeedFunded": ["$SeedFunded"],
+        // "TaxExempted": ["$TaxExempted"],
+        // "DpiitCertified": ["$DpiitCertified"],
+        // "ShowcasedStartups": ["$ShowcasedStartups"],
+        // "PatentStartup": ["$PatentStartup"],
+        // "FFS": ["$FFS"]
+      },
+    },
   ];
 
-  // console.log(query);
+  console.log(JSON.stringify(query));
 
   let promAllCV3 = new Promise((resolve, rej) => {
     try {
       mongodb
         .getDb()
         .collection("digitalMapUser")
-        .aggregate(query).toArray(async (err, result) => {
+        .aggregate(query)
+        .toArray(async (err, result) => {
           if (err) throw err;
           let output = await result[0];
           resolve(output);
         });
     } catch (err) {
-      console.error('populateMultiFieldCountsForCountryV3 :: ' + err.message);
+      console.error("populateMultiFieldCountsForCountryV3 :: " + err.message);
     }
   });
   return Promise.all([promAllCV3])
@@ -1515,92 +1966,98 @@ async function populateMultiFieldCountsForCountryV3(from, to, body) {
 }
 
 async function populateMultiFieldCountsForCountry(from, to) {
- 
-  const groupQuery = { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum": 1 }, };
-  const profileRegisteredRange = { "$lte": (to), "$gte": (from), };
+  const groupQuery = {
+    _id: {
+      stateId: "$stateId",
+      state: "$stateName",
+      districtId: "$districtId",
+      district: "$districtName",
+    },
+    count: { $sum: 1 },
+  };
+  const profileRegisteredRange = { $lte: to, $gte: from };
   let query = [
     {
-      "$match": {"profileRegisteredOn": profileRegisteredRange}
+      $match: { profileRegisteredOn: profileRegisteredRange },
     },
     {
-      
-      "$facet": {
-        "Startup": [
-          { "$match": { "role": { "$eq": 'Startup' },  } },
-          { "$group": groupQuery, },
+      $facet: {
+        Startup: [
+          { $match: { role: { $eq: "Startup" } } },
+          { $group: groupQuery },
         ],
-        "Investor": [
-          { "$match": { "role": { "$eq": 'Investor' },  } },
-          { "$group": groupQuery, },
+        Investor: [
+          { $match: { role: { $eq: "Investor" } } },
+          { $group: groupQuery },
         ],
-        "Accelerator": [
-          { "$match": { "role": { "$eq": 'Accelerator' },  } },
-          { "$group": groupQuery, },
+        Accelerator: [
+          { $match: { role: { $eq: "Accelerator" } } },
+          { $group: groupQuery },
         ],
-        "Individual": [
-          { "$match": { "role": { "$eq": 'Individual' },  } },
-          { "$group": groupQuery, },
+        Individual: [
+          { $match: { role: { $eq: "Individual" } } },
+          { $group: groupQuery },
         ],
-        "Mentor": [
-          { "$match": { "role": { "$eq": 'Mentor' },  } },
-          { "$group": groupQuery, },
+        Mentor: [
+          { $match: { role: { $eq: "Mentor" } } },
+          { $group: groupQuery },
         ],
-        "GovernmentBody": [
-          { "$match": { "role": { "$eq": 'GovernmentBody' },  } },
-          { "$group": groupQuery, },
+        GovernmentBody: [
+          { $match: { role: { $eq: "GovernmentBody" } } },
+          { $group: groupQuery },
         ],
-        "Incubator": [
-          { "$match": { "role": { "$eq": 'Incubator' },  } },
-          { "$group": groupQuery, },
+        Incubator: [
+          { $match: { role: { $eq: "Incubator" } } },
+          { $group: groupQuery },
         ],
-        "WomenOwned": [
-          { "$match": { "womenOwned": { "$eq": true },  } },
-          { "$group": groupQuery, },
+        WomenOwned: [
+          { $match: { womenOwned: { $eq: true } } },
+          { $group: groupQuery },
         ],
-        "SeedFunded": [
-          { "$match": { "seedFunded": { "$eq": true },  } },
-          { "$group": groupQuery, },
+        SeedFunded: [
+          { $match: { seedFunded: { $eq: true } } },
+          { $group: groupQuery },
         ],
-        "TaxExempted": [
-          { "$match": { "taxExempted": { "$eq": true },  } },
-          { "$group": groupQuery, },
+        TaxExempted: [
+          { $match: { taxExempted: { $eq: true } } },
+          { $group: groupQuery },
         ],
-        "DpiitCertified": [
-          { "$match": { "dpiitCertified": { "$eq": true },  } },
-          { "$group": groupQuery, },
+        DpiitCertified: [
+          { $match: { dpiitCertified: { $eq: true } } },
+          { $group: groupQuery },
         ],
-        "FFS": [
-          { "$match": { "fundOfFunds": { "$eq": true },  } },
-          { "$group": groupQuery, },
+        FFS: [
+          { $match: { fundOfFunds: { $eq: true } } },
+          { $group: groupQuery },
         ],
-        "ShowcasedStartups": [
-          { "$match": { "showcased": { "$eq": true },  } },
-          { "$group": groupQuery, },
+        ShowcasedStartups: [
+          { $match: { showcased: { $eq: true } } },
+          { $group: groupQuery },
         ],
-        "PatentStartup": [
-          { "$match": { "patented": { "$eq": true },  } },
-          { "$group": groupQuery, },
-        ]
-      }
+        PatentStartup: [
+          { $match: { patented: { $eq: true } } },
+          { $group: groupQuery },
+        ],
+      },
     },
     {
-      "$project": {
-        "Startup": ["$Startup"],
-        "Investor": ["$Investor"],
-        "Accelerator": ["$Accelerator"],
-        "Individual": ["$Individual"],
-        "Mentor": ["$Mentor"],
-        "GovernmentBody": ["$GovernmentBody"],
-        "Incubator": ["$Incubator"],
-        "WomenOwned": ["$WomenOwned"],
-        "SeedFunded": ["$SeedFunded"],
-        "TaxExempted": ["$TaxExempted"],
-        "DpiitCertified": ["$DpiitCertified"],
-        "ShowcasedStartups": ["$ShowcasedStartups"],
-        "PatentStartup": ["$PatentStartup"],
-        "FFS": ["$FFS"]
-      }
-    }
+      $project: {
+        Startup: ["$Startup"],
+        Investor: ["$Investor"],
+        Accelerator: ["$Accelerator"],
+        Individual: ["$Individual"],
+        Mentor: ["$Mentor"],
+        GovernmentBody: ["$GovernmentBody"],
+        Incubator: ["$Incubator"],
+        WomenOwned: ["$WomenOwned"],
+        SeedFunded: ["$SeedFunded"],
+        TaxExempted: ["$TaxExempted"],
+        DpiitCertified: ["$DpiitCertified"],
+        ShowcasedStartups: ["$ShowcasedStartups"],
+        PatentStartup: ["$PatentStartup"],
+        FFS: ["$FFS"],
+      },
+    },
   ];
 
   var promAllCountry = new Promise((resolve, rej) => {
@@ -1608,13 +2065,14 @@ async function populateMultiFieldCountsForCountry(from, to) {
       mongodb
         .getDb()
         .collection("digitalMapUser")
-        .aggregate(query).toArray(async (err, result) => {
+        .aggregate(query)
+        .toArray(async (err, result) => {
           if (err) throw err;
           let output = await result[0];
           resolve(output);
         });
     } catch (err) {
-      console.error('populateMultiFieldCountsForCountry :: ' + err.message);
+      console.error("populateMultiFieldCountsForCountry :: " + err.message);
     }
   });
   return Promise.all([promAllCountry])
@@ -1637,30 +2095,30 @@ async function processStatewiseResults(data) {
 }
 
 function addAdditionalMatchConditions(subQuery, data) {
-  if (data.hasOwnProperty('stages') && data.stages.length) {
+  if (data.hasOwnProperty("stages") && data.stages.length) {
     subQuery.stage = {
-      "$in": data.stages
-    }
+      $in: data.stages,
+    };
   }
 
-  if (data.hasOwnProperty('industries') && data.industries.length) {
+  if (data.hasOwnProperty("industries") && data.industries.length) {
     let inds = [];
     for (let ind of data.industries) {
       inds.push(new ObjectId(ind));
     }
-    subQuery['industry._id'] = {
-      "$in": inds,
-    }
+    subQuery["industry._id"] = {
+      $in: inds,
+    };
   }
 
-  if (data.hasOwnProperty('sectors') && data.sectors.length) {
+  if (data.hasOwnProperty("sectors") && data.sectors.length) {
     let secs = [];
     for (let sec of data.sectors) {
       secs.push(new ObjectId(sec));
     }
-    subQuery['sector._id'] = {
-      "$in": secs,
-    }
+    subQuery["sector._id"] = {
+      $in: secs,
+    };
   }
 
   return subQuery;
@@ -1669,9 +2127,6 @@ function addAdditionalMatchConditions(subQuery, data) {
 function fillUndefined(value) {
   return _.isUndefined(value) ? 0 : value;
 }
-
-
-
 
 router.post(
   "/stats1/:geographicalEntity/:entityId/:from/:to",
@@ -1695,22 +2150,27 @@ router.post(
     output.from = req.params.from;
     output.to = req.params.to;
 
-    const from = new Date (req.params.from);
-    const to = new Date (req.params.to);
+    const from = new Date(req.params.from);
+    const to = new Date(req.params.to);
 
-    if ((!_.isEmpty(req.params.from) && !_.isEmpty(req.params.to)) ||
-      moment(req.params.from, "YYYY-MM-DD", true).isValid() && moment(req.params.to, "YYYY-MM-DD", true).isValid()) {
-      console.log("Valid dates passed.")
+    if (
+      (!_.isEmpty(req.params.from) && !_.isEmpty(req.params.to)) ||
+      (moment(req.params.from, "YYYY-MM-DD", true).isValid() &&
+        moment(req.params.to, "YYYY-MM-DD", true).isValid())
+    ) {
+      console.log("Valid dates passed.");
     } else {
-      resp.status(500).json({ message: 'Invalid Date Format, expected in YYYY-MM-DD' });
+      resp
+        .status(500)
+        .json({ message: "Invalid Date Format, expected in YYYY-MM-DD" });
     }
 
     let subQuery = {};
     subQuery.profileRegisteredOn = {
-      "$lte": to,
-      "$gte": from,
+      $lte: to,
+      $gte: from,
     };
-// resp.send(JSON.stringify(req.params));
+    // resp.send(JSON.stringify(req.params));
     var result = [];
     if (req.params.geographicalEntity == "country") {
       // Country - India level
@@ -1722,7 +2182,7 @@ router.post(
       for (let i = 0; i < items.length; i++) {
         let key = items[i];
         let v = countryCounts[key].length ? countryCounts[key][0] : [];
-       
+
         for (let j = 0; j < v.length; j++) {
           let x = v[j];
           let c = x.count;
@@ -1753,7 +2213,7 @@ router.post(
         state.state = val.state;
         state.name = val.state;
         state.text = val.state;
-       
+
         count.Startup = fillUndefined(val.statistics.Startup);
         count.Mentor = fillUndefined(val.statistics.Mentor);
         count.Incubator = fillUndefined(val.statistics.Incubator);
@@ -1767,7 +2227,6 @@ router.post(
       }
       output.data = countsArr;
       resp.status(200).send(output);
-
     } else if (req.params.geographicalEntity == "state") {
       // State level
       let stateId = req.params.entityId;
@@ -1814,7 +2273,6 @@ router.post(
         district.stateId = val.stateId;
         district.state = val.state;
 
-        
         count.Startup = fillUndefined(val.statistics.Startup);
         count.Mentor = fillUndefined(val.statistics.Mentor);
         count.Incubator = fillUndefined(val.statistics.Incubator);
@@ -1856,36 +2314,41 @@ router.post(
     output.from = req.params.from;
     output.to = req.params.to;
 
-    const from = new Date (req.params.from);
-    const to = new Date (req.params.to);
+    const from = new Date(req.params.from);
+    const to = new Date(req.params.to);
 
-    if ((!_.isEmpty(req.params.from) && !_.isEmpty(req.params.to)) ||
-      moment(req.params.from, "YYYY-MM-DD", true).isValid() && moment(req.params.to, "YYYY-MM-DD", true).isValid()) {
-      console.log("Valid dates passed.")
+    if (
+      (!_.isEmpty(req.params.from) && !_.isEmpty(req.params.to)) ||
+      (moment(req.params.from, "YYYY-MM-DD", true).isValid() &&
+        moment(req.params.to, "YYYY-MM-DD", true).isValid())
+    ) {
+      console.log("Valid dates passed.");
     } else {
-      resp.status(500).json({ message: 'Invalid Date Format, expected in YYYY-MM-DD' });
+      resp
+        .status(500)
+        .json({ message: "Invalid Date Format, expected in YYYY-MM-DD" });
     }
 
     let subQuery = {};
     subQuery.profileRegisteredOn = {
-      "$lte": to,
-      "$gte": from,
+      $lte: to,
+      $gte: from,
     };
-// resp.send(JSON.stringify(req.params));
+    // resp.send(JSON.stringify(req.params));
     var result = [];
     if (req.params.geographicalEntity == "country") {
       // Country - India level
-      let countryCounts = await populateStats2Country(from , to, req.body);
-    
+      let countryCounts = await populateStats2Country(from, to, req.body);
+
       let map = new Map();
-      
+
       //Get all keys i.e. statistics received
       let items = Object.keys(countryCounts);
-  
+
       for (let i = 0; i < items.length; i++) {
         let key = items[i];
         let v = countryCounts[key].length ? countryCounts[key][0] : [];
-      
+
         for (let j = 0; j < v.length; j++) {
           let x = v[j];
           let c = x.count;
@@ -1895,7 +2358,6 @@ router.post(
             let countData = map.get(x.stateId);
             countData.statistics[key] = c;
             map.set(x.stateId, countData);
-           
           } else {
             let placeholder = JSON.parse(JSON.stringify(dataCountOthers));
             placeholder[key] = c;
@@ -1905,10 +2367,9 @@ router.post(
             data.statistics = placeholder;
             map.set(x.stateId, data);
           }
-          
         }
       }
-   
+
       let countsArr = [];
       for (let [key, val] of map.entries()) {
         let state = {};
@@ -1919,7 +2380,7 @@ router.post(
         state.state = val.state;
         state.name = val.state;
         state.text = val.state;
-       
+
         count.DpiitCertified = fillUndefined(val.statistics.dpiitCertified);
         count.ShowcasedStartups = fillUndefined(val.statistics.showcased);
         count.SeedFunded = fillUndefined(val.statistics.seedFunded);
@@ -1935,7 +2396,6 @@ router.post(
       }
       output.data = countsArr;
       resp.status(200).send(output);
-
     } else if (req.params.geographicalEntity == "state") {
       // State level
       let stateId = req.params.entityId;
@@ -1982,7 +2442,6 @@ router.post(
         district.stateId = val.stateId;
         district.state = val.state;
 
-        
         count.DpiitCertified = fillUndefined(val.statistics.dpiitCertified);
         count.ShowcasedStartups = fillUndefined(val.statistics.showcased);
         count.SeedFunded = fillUndefined(val.statistics.seedFunded);
@@ -2005,80 +2464,86 @@ router.post(
 );
 
 async function populateStats1Country(from, to, body) {
- 
-  let subQuery = {"profileRegisteredOn": { "$lte": (to), "$gte": (from), }};
+  let subQuery = { profileRegisteredOn: { $lte: to, $gte: from } };
 
-  if (body.hasOwnProperty('states') && body.states.length) {
+  if (body.hasOwnProperty("states") && body.states.length) {
     let states = [];
     for (let state of body.states) {
       states.push(new ObjectId(state));
     }
-    subQuery['stateId'] = {
-      "$in": body.states,
-    }
+    subQuery["stateId"] = {
+      $in: body.states,
+    };
   }
 
-  if (body.hasOwnProperty('stages') && body.stages.length) {
-   
+  if (body.hasOwnProperty("stages") && body.stages.length) {
     subQuery.stage = {
-      "$in": body.stages
-    }
+      $in: body.stages,
+    };
   }
 
-  if (body.hasOwnProperty('industries') && body.industries.length) {
+  if (body.hasOwnProperty("industries") && body.industries.length) {
     let inds = [];
     for (let ind of body.industries) {
       inds.push(new ObjectId(ind));
     }
-    subQuery['industry._id'] = {
-      "$in": inds,
-    }
+    subQuery["industry._id"] = {
+      $in: inds,
+    };
   }
 
-  if (body.hasOwnProperty('sectors') && body.sectors.length) {
+  if (body.hasOwnProperty("sectors") && body.sectors.length) {
     let secs = [];
     for (let sec of body.sectors) {
       secs.push(new ObjectId(sec));
     }
-    subQuery['sector._id'] = {
-      "$in": secs,
-    }
+    subQuery["sector._id"] = {
+      $in: secs,
+    };
   }
-  
-  const facetArr = ["Startup", "Investor", "Accelerator", "Mentor", "GovernmentBody", "Incubator"];
 
-  const groupQuery={ "_id": { "stateId": "$stateId", "state": "$stateName" }, "count": { "$sum": 1 }, };
+  const facetArr = [
+    "Startup",
+    "Investor",
+    "Accelerator",
+    "Mentor",
+    "GovernmentBody",
+    "Incubator",
+  ];
+
+  const groupQuery = {
+    _id: { stateId: "$stateId", state: "$stateName" },
+    count: { $sum: 1 },
+  };
 
   let facetMap = new Map();
-  facetArr.forEach(e =>
-    facetMap.set(e, [{ "$match": { "role": { "$eq": e }, } },{ "$group": groupQuery }, ])
+  facetArr.forEach((e) =>
+    facetMap.set(e, [{ $match: { role: { $eq: e } } }, { $group: groupQuery }])
   );
   let facetQuery = Object.fromEntries(facetMap);
 
   let projectMap = new Map();
-  facetArr.forEach(e =>
-    projectMap.set(e, [`$${e}`,0] )
-  
-  );
+  facetArr.forEach((e) => projectMap.set(e, [`$${e}`, 0]));
   let projectQuery = Object.fromEntries(projectMap);
 
   let query = [];
-  query.push({"$match": subQuery});
-  query.push({"$facet": facetQuery});
-  query.push({"$project": projectQuery});
+  query.push({ $match: subQuery });
+  query.push({ $facet: facetQuery });
+  query.push({ $project: projectQuery });
 
   let promAllCV3 = new Promise((resolve, rej) => {
     try {
       mongodb
         .getDb()
         .collection("digitalMapUser")
-        .aggregate(query).toArray(async (err, result) => {
+        .aggregate(query)
+        .toArray(async (err, result) => {
           if (err) throw err;
           let output = await result[0];
           resolve(output);
         });
     } catch (err) {
-      console.error('populateStats1Country :: ' + err.message);
+      console.error("populateStats1Country :: " + err.message);
     }
   });
   return Promise.all([promAllCV3])
@@ -2092,69 +2557,81 @@ async function populateStats1Country(from, to, body) {
 }
 
 async function populateStats1State(stateId, from, to, body) {
-
   let subQuery = {
-    "profileRegisteredOn": { "$lte": (to), "$gte": (from), },
-    "stateId": { "$eq": stateId }
+    profileRegisteredOn: { $lte: to, $gte: from },
+    stateId: { $eq: stateId },
   };
-  if (body.hasOwnProperty('stages') && body.stages.length) {
+  if (body.hasOwnProperty("stages") && body.stages.length) {
     subQuery.stage = {
-      "$in": body.stages
-    }
+      $in: body.stages,
+    };
   }
-  if (body.hasOwnProperty('industries') && body.industries.length) {
+  if (body.hasOwnProperty("industries") && body.industries.length) {
     let inds = [];
     for (let ind of body.industries) {
       inds.push(new ObjectId(ind));
     }
-    subQuery['industry._id'] = {
-      "$in": inds,
-    }
+    subQuery["industry._id"] = {
+      $in: inds,
+    };
   }
-  if (body.hasOwnProperty('sectors') && body.sectors.length) {
+  if (body.hasOwnProperty("sectors") && body.sectors.length) {
     let secs = [];
     for (let sec of body.sectors) {
       secs.push(new ObjectId(sec));
     }
-    subQuery['sector._id'] = {
-      "$in": secs,
-    }
+    subQuery["sector._id"] = {
+      $in: secs,
+    };
   }
-  
-  const facetArr = ["Startup", "Investor", "Accelerator", "Mentor", "GovernmentBody", "Incubator"];
 
-  const groupQuery =  { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum":1 }, };
+  const facetArr = [
+    "Startup",
+    "Investor",
+    "Accelerator",
+    "Mentor",
+    "GovernmentBody",
+    "Incubator",
+  ];
+
+  const groupQuery = {
+    _id: {
+      stateId: "$stateId",
+      state: "$stateName",
+      districtId: "$districtId",
+      district: "$districtName",
+    },
+    count: { $sum: 1 },
+  };
 
   let facetMap = new Map();
-  facetArr.forEach(e =>
-    facetMap.set(e, [{ "$match": { "role": { "$eq": e }, } },{ "$group": groupQuery }, ])
+  facetArr.forEach((e) =>
+    facetMap.set(e, [{ $match: { role: { $eq: e } } }, { $group: groupQuery }])
   );
   let facetQuery = Object.fromEntries(facetMap);
 
   let projectMap = new Map();
-  facetArr.forEach(e =>
-    projectMap.set(e, [`$${e}`,0] )
-  
-  );
+  facetArr.forEach((e) => projectMap.set(e, [`$${e}`, 0]));
   let projectQuery = Object.fromEntries(projectMap);
 
   let query = [];
-  query.push({"$match": subQuery});
-  query.push({"$facet": facetQuery});
-  query.push({"$project": projectQuery});
-  
+  query.push({ $match: subQuery });
+  query.push({ $facet: facetQuery });
+  query.push({ $project: projectQuery });
+
   let promAllV3 = new Promise((resolve, rej) => {
     try {
       mongodb
         .getDb()
         .collection("digitalMapUser")
-        .aggregate(query).toArray(async (err, result) => {
+        .aggregate(query)
+        .toArray(async (err, result) => {
           if (err) throw err;
           let output = await result[0];
           resolve(output);
         });
     } catch (err) {
-      console.error('populateStats1State :: ' + err.message);
+      console.error("populateStats1State :: " + err.message);
     }
   });
   return Promise.all([promAllV3])
@@ -2168,82 +2645,96 @@ async function populateStats1State(stateId, from, to, body) {
 }
 
 async function populateStats2Country(from, to, body) {
- 
-  let subQuery = {"role":{"$eq":"Startup"},"profileRegisteredOn": { "$lte": (to), "$gte": (from), }};
+  let subQuery = {
+    role: { $eq: "Startup" },
+    profileRegisteredOn: { $lte: to, $gte: from },
+  };
 
-  if (body.hasOwnProperty('states') && body.states.length) {
+  if (body.hasOwnProperty("states") && body.states.length) {
     let states = [];
     for (let state of body.states) {
       states.push(new ObjectId(state));
     }
-    subQuery['stateId'] = {
-      "$in": body.states,
-    }
+    subQuery["stateId"] = {
+      $in: body.states,
+    };
   }
 
-  if (body.hasOwnProperty('stages') && body.stages.length) {
-   
+  if (body.hasOwnProperty("stages") && body.stages.length) {
     subQuery.stage = {
-      "$in": body.stages
-    }
+      $in: body.stages,
+    };
   }
 
-  if (body.hasOwnProperty('industries') && body.industries.length) {
+  if (body.hasOwnProperty("industries") && body.industries.length) {
     let inds = [];
     for (let ind of body.industries) {
       inds.push(new ObjectId(ind));
     }
-    subQuery['industry._id'] = {
-      "$in": inds,
-    }
+    subQuery["industry._id"] = {
+      $in: inds,
+    };
   }
 
-  if (body.hasOwnProperty('sectors') && body.sectors.length) {
+  if (body.hasOwnProperty("sectors") && body.sectors.length) {
     let secs = [];
     for (let sec of body.sectors) {
       secs.push(new ObjectId(sec));
     }
-    subQuery['sector._id'] = {
-      "$in": secs,
-    }
+    subQuery["sector._id"] = {
+      $in: secs,
+    };
   }
 
-  const facetArr = ["dpiitCertified", "showcased","seedFunded","fundOfFunds",
-  "seedFunded","patented","womenOwned", "leadingSector", "declaredRewards"];
+  const facetArr = [
+    "dpiitCertified",
+    "showcased",
+    "seedFunded",
+    "fundOfFunds",
+    "seedFunded",
+    "patented",
+    "womenOwned",
+    "leadingSector",
+    "declaredRewards",
+  ];
 
-  const groupQuery={ "_id": { "stateId": "$stateId", "state": "$stateName" }, "count": { "$sum": 1 }, };
+  const groupQuery = {
+    _id: { stateId: "$stateId", state: "$stateName" },
+    count: { $sum: 1 },
+  };
 
   let facetMap = new Map();
-  facetArr.forEach(e =>
-    facetMap.set(e, [{ "$match": { [e]: { "$eq": true }, } },{ "$group": groupQuery }, ])
+  facetArr.forEach((e) =>
+    facetMap.set(e, [
+      { $match: { [e]: { $eq: true } } },
+      { $group: groupQuery },
+    ])
   );
   let facetQuery = Object.fromEntries(facetMap);
 
   let projectMap = new Map();
-  facetArr.forEach(e =>
-    projectMap.set(e, [`$${e}`,0] )
-  
-  );
+  facetArr.forEach((e) => projectMap.set(e, [`$${e}`, 0]));
   let projectQuery = Object.fromEntries(projectMap);
-  console.log(projectQuery)
+  console.log(projectQuery);
 
   let query = [];
-  query.push({"$match": subQuery});
-  query.push({"$facet": facetQuery});
-  query.push({"$project": projectQuery});
-// console.log(query)
+  query.push({ $match: subQuery });
+  query.push({ $facet: facetQuery });
+  query.push({ $project: projectQuery });
+  // console.log(query)
   let promAllCV3 = new Promise((resolve, rej) => {
     try {
       mongodb
         .getDb()
         .collection("digitalMapUser")
-        .aggregate(query).toArray(async (err, result) => {
+        .aggregate(query)
+        .toArray(async (err, result) => {
           if (err) throw err;
           let output = await result[0];
           resolve(output);
         });
     } catch (err) {
-      console.error('populateStats2Country :: ' + err.message);
+      console.error("populateStats2Country :: " + err.message);
     }
   });
   return Promise.all([promAllCV3])
@@ -2257,69 +2748,81 @@ async function populateStats2Country(from, to, body) {
 }
 
 async function populateStats1State(stateId, from, to, body) {
-
   let subQuery = {
-    "profileRegisteredOn": { "$lte": (to), "$gte": (from), },
-    "stateId": { "$eq": stateId }
+    profileRegisteredOn: { $lte: to, $gte: from },
+    stateId: { $eq: stateId },
   };
-  if (body.hasOwnProperty('stages') && body.stages.length) {
+  if (body.hasOwnProperty("stages") && body.stages.length) {
     subQuery.stage = {
-      "$in": body.stages
-    }
+      $in: body.stages,
+    };
   }
-  if (body.hasOwnProperty('industries') && body.industries.length) {
+  if (body.hasOwnProperty("industries") && body.industries.length) {
     let inds = [];
     for (let ind of body.industries) {
       inds.push(new ObjectId(ind));
     }
-    subQuery['industry._id'] = {
-      "$in": inds,
-    }
+    subQuery["industry._id"] = {
+      $in: inds,
+    };
   }
-  if (body.hasOwnProperty('sectors') && body.sectors.length) {
+  if (body.hasOwnProperty("sectors") && body.sectors.length) {
     let secs = [];
     for (let sec of body.sectors) {
       secs.push(new ObjectId(sec));
     }
-    subQuery['sector._id'] = {
-      "$in": secs,
-    }
+    subQuery["sector._id"] = {
+      $in: secs,
+    };
   }
-  
-  const facetArr = ["Startup", "Investor", "Accelerator", "Mentor", "GovernmentBody", "Incubator"];
 
-  const groupQuery =  { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum":1 }, };
+  const facetArr = [
+    "Startup",
+    "Investor",
+    "Accelerator",
+    "Mentor",
+    "GovernmentBody",
+    "Incubator",
+  ];
+
+  const groupQuery = {
+    _id: {
+      stateId: "$stateId",
+      state: "$stateName",
+      districtId: "$districtId",
+      district: "$districtName",
+    },
+    count: { $sum: 1 },
+  };
 
   let facetMap = new Map();
-  facetArr.forEach(e =>
-    facetMap.set(e, [{ "$match": { "role": { "$eq": e }, } },{ "$group": groupQuery }, ])
+  facetArr.forEach((e) =>
+    facetMap.set(e, [{ $match: { role: { $eq: e } } }, { $group: groupQuery }])
   );
   let facetQuery = Object.fromEntries(facetMap);
 
   let projectMap = new Map();
-  facetArr.forEach(e =>
-    projectMap.set(e, [`$${e}`,0] )
-  
-  );
+  facetArr.forEach((e) => projectMap.set(e, [`$${e}`, 0]));
   let projectQuery = Object.fromEntries(projectMap);
 
   let query = [];
-  query.push({"$match": subQuery});
-  query.push({"$facet": facetQuery});
-  query.push({"$project": projectQuery});
-  
+  query.push({ $match: subQuery });
+  query.push({ $facet: facetQuery });
+  query.push({ $project: projectQuery });
+
   let promAllV3 = new Promise((resolve, rej) => {
     try {
       mongodb
         .getDb()
         .collection("digitalMapUser")
-        .aggregate(query).toArray(async (err, result) => {
+        .aggregate(query)
+        .toArray(async (err, result) => {
           if (err) throw err;
           let output = await result[0];
           resolve(output);
         });
     } catch (err) {
-      console.error('populateStats1State :: ' + err.message);
+      console.error("populateStats1State :: " + err.message);
     }
   });
   return Promise.all([promAllV3])
@@ -2333,82 +2836,98 @@ async function populateStats1State(stateId, from, to, body) {
 }
 
 async function populateStats2State(stateId, from, to, body) {
+  let subQuery = {
+    profileRegisteredOn: { $lte: to, $gte: from },
+    stateId: { $eq: stateId },
+  };
+  if (body.hasOwnProperty("stages") && body.stages.length) {
+    subQuery.stage = {
+      $in: body.stages,
+    };
+  }
+  if (body.hasOwnProperty("industries") && body.industries.length) {
+    let inds = [];
+    for (let ind of body.industries) {
+      inds.push(new ObjectId(ind));
+    }
+    subQuery["industry._id"] = {
+      $in: inds,
+    };
+  }
+  if (body.hasOwnProperty("sectors") && body.sectors.length) {
+    let secs = [];
+    for (let sec of body.sectors) {
+      secs.push(new ObjectId(sec));
+    }
+    subQuery["sector._id"] = {
+      $in: secs,
+    };
+  }
 
- let subQuery = {
-   "profileRegisteredOn": { "$lte": (to), "$gte": (from), },
-   "stateId": { "$eq": stateId }
- };
- if (body.hasOwnProperty('stages') && body.stages.length) {
-   subQuery.stage = {
-     "$in": body.stages
-   }
- }
- if (body.hasOwnProperty('industries') && body.industries.length) {
-   let inds = [];
-   for (let ind of body.industries) {
-     inds.push(new ObjectId(ind));
-   }
-   subQuery['industry._id'] = {
-     "$in": inds,
-   }
- }
- if (body.hasOwnProperty('sectors') && body.sectors.length) {
-   let secs = [];
-   for (let sec of body.sectors) {
-     secs.push(new ObjectId(sec));
-   }
-   subQuery['sector._id'] = {
-     "$in": secs,
-   }
- }
+  const facetArr = [
+    "dpiitCertified",
+    "showcased",
+    "seedFunded",
+    "fundOfFunds",
+    "seedFunded",
+    "patented",
+    "womenOwned",
+    "leadingSector",
+    "declaredRewards",
+  ];
 
- const facetArr = ["dpiitCertified", "showcased","seedFunded","fundOfFunds",
-  "seedFunded","patented","womenOwned", "leadingSector", "declaredRewards"];
-
-  const groupQuery =  { "_id": { "stateId": "$stateId", "state": "$stateName", "districtId": "$districtId", "district": "$districtName" }, "count": { "$sum":1 }, };
+  const groupQuery = {
+    _id: {
+      stateId: "$stateId",
+      state: "$stateName",
+      districtId: "$districtId",
+      district: "$districtName",
+    },
+    count: { $sum: 1 },
+  };
 
   let facetMap = new Map();
-  facetArr.forEach(e =>
-    facetMap.set(e, [{ "$match": { [e]: { "$eq": true }, } },{ "$group": groupQuery }, ])
+  facetArr.forEach((e) =>
+    facetMap.set(e, [
+      { $match: { [e]: { $eq: true } } },
+      { $group: groupQuery },
+    ])
   );
-
 
   let facetQuery = Object.fromEntries(facetMap);
 
   let projectMap = new Map();
-  facetArr.forEach(e =>
-    projectMap.set(e, [`$${e}`,0] )
-  
-  );
+  facetArr.forEach((e) => projectMap.set(e, [`$${e}`, 0]));
   let projectQuery = Object.fromEntries(projectMap);
 
- let query = [];
- query.push({"$match": subQuery});
- query.push({"$facet": facetQuery});
- query.push({"$project": projectQuery});
- 
- let promAllV3 = new Promise((resolve, rej) => {
-   try {
-     mongodb
-       .getDb()
-       .collection("digitalMapUser")
-       .aggregate(query).toArray(async (err, result) => {
-         if (err) throw err;
-         let output = await result[0];
-         resolve(output);
-       });
-   } catch (err) {
-     console.error('populateStats2State :: ' + err.message);
-   }
- });
- return Promise.all([promAllV3])
-   .then((values) => {
-     // console.log("All promises resolved - " + JSON.stringify(values));
-     return values[0];
-   })
-   .catch((reason) => {
-     console.log(reason);
-   });
+  let query = [];
+  query.push({ $match: subQuery });
+  query.push({ $facet: facetQuery });
+  query.push({ $project: projectQuery });
+
+  let promAllV3 = new Promise((resolve, rej) => {
+    try {
+      mongodb
+        .getDb()
+        .collection("digitalMapUser")
+        .aggregate(query)
+        .toArray(async (err, result) => {
+          if (err) throw err;
+          let output = await result[0];
+          resolve(output);
+        });
+    } catch (err) {
+      console.error("populateStats2State :: " + err.message);
+    }
+  });
+  return Promise.all([promAllV3])
+    .then((values) => {
+      // console.log("All promises resolved - " + JSON.stringify(values));
+      return values[0];
+    })
+    .catch((reason) => {
+      console.log(reason);
+    });
 }
 
 module.exports = router;

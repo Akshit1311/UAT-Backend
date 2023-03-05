@@ -148,7 +148,7 @@ router.post("/startupCounts/:startupType", async (req, resp) => {
   //if from and to dates are passed then count is shown for startups registered between the given dates
 
   //Array to accept variable parameters e.g. stateId, industries, sectors, from and to dates
-  const acceptedParams = ["role"];
+  const acceptedParams = ["country","role"];
   const states=[];
   const industries = [];
   const sectors=[];
@@ -170,6 +170,7 @@ router.post("/startupCounts/:startupType", async (req, resp) => {
   const sect =sectors.map(e=>e=ObjectId(e));
   //Building default body set for building final queries based on input parameters
   const obj = {
+    country: { "countryName": { "$eq": "India" } },
     role: { "role": { "$eq": "Startup" } },
     profileRegisteredOn: { "profileRegisteredOn": { "$gte": from, "$lte": to } },
     states: { "stateId": states[0] },
@@ -216,7 +217,7 @@ return executeQuery(resp,query);
 
 router.post("/leadingSector",async(req,resp)=>{
 //Array to accept variable parameters e.g. stateId, industries, sectors, from and to dates
-const acceptedParams = ["role"];
+const acceptedParams = ["country","role"];
 const states=[];
 const industries = [];
 const sectors=[];
@@ -234,6 +235,7 @@ const sect =sectors.map(e=>e=ObjectId(e));
 
 //Building default body set for building final queries based on input parameters
 const obj = {
+  country: { "countryName": { "$eq": "India" } },
   role: { "role": { "$eq": "Startup" } },
   profileRegisteredOn: { "profileRegisteredOn": { "$gte": from, "$lte": to } },
   states: { "stateId": states[0] },
