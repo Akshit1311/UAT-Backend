@@ -17,7 +17,7 @@
       }
     ]
   },
-  "dpiitRecogniseUser": false,
+  "dpiitRecogniseUser": true,
   "is80iacExempted": false,
   "internationalUser": false,
   "registrationFrom": "",
