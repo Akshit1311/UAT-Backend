@@ -3,8 +3,8 @@ const router = express.Router();
 const request = require("request");
 const mongodb = require("../mongodb");
 const moment = require("moment");
-const _ = require('lodash');
-const ObjectId = require('mongodb').ObjectId;
+const _ = require("lodash");
+const ObjectId = require("mongodb").ObjectId;
 const fs = require("fs");
 const { map } = require("lodash");
 var data = fs.readFileSync("./static/count.json", "utf8");
@@ -22,17 +22,17 @@ var blankFilterQuery = fs.readFileSync(
 );
 blankFilterQuery = JSON.parse(blankFilterQuery);
 const startupTypeKeywordMap = {
-  "0": "Startup",
-  "1": "dpiitCertified",
-  "2": "showcased",
-  "3": "seedFunded",
-  "4": "fundOfFunds",
-  "5": "seedFunded",
-  "6": "patented",
-  "7": "womenOwned",
-  "8": "leadingSector",
-  "9": "declaredRewards"
-}
+  0: "Startup",
+  1: "dpiitCertified",
+  2: "showcased",
+  3: "seedFunded",
+  4: "fundOfFunds",
+  5: "seedFunded",
+  6: "patented",
+  7: "womenOwned",
+  8: "leadingSector",
+  9: "declaredRewards",
+};
 
 // Get by date range
 router.get("/count/:from/:to", (req, res) => {
@@ -213,6 +213,11 @@ router.post("/filter", (req, resp) => {
   query.badges = req.body.badges;
   query.roles = req.body.roles;
   query.page = req.body.page;
+  const otherRoles = ["Incubator", "Accelerator", "Mentor"];
+  // console.log(JSON.stringify(query.roles));
+  if (otherRoles.includes(query.roles[0])) {
+    query.dpiitRecogniseUser = false;
+  }
 
   var options = {
     method: "POST",
@@ -307,11 +312,14 @@ router.post("/filter/defaults", (req, resp) => {
     // var allBadgesArr = allFilterableItems[7].content;
 
     // var allDpiitCertifiedsArr = allFilterableItems[8].content;
-   //All states
+    //All states
     output.states = allFilterableItems[3].content.map(transformData);
     //All Unique Sectors
-    output.sectors =   getUniqueListBy(allFilterableItems[1].content.map(transformData),'value');
-   
+    output.sectors = getUniqueListBy(
+      allFilterableItems[1].content.map(transformData),
+      "value"
+    );
+
     //All Industries
     output.industries = allFilterableItems[0].content.map(transformData);
     //All Stages
@@ -508,31 +516,41 @@ router.post("/filter/v2/defaults", async (req, resp) => {
     } */
   console.log("Filter request - " + JSON.stringify(req.body));
 
-  if ((!req.body.hasOwnProperty('registrationFrom') && !req.body.hasOwnProperty('registrationTo')) ||
-    (_.isEmpty(req.body.registrationFrom) && _.isEmpty(req.body.registrationTo)) ||
-    moment(req.body.registrationTo, "YYYY-MM-DD", true).isValid() && moment(req.body.registrationFrom, "YYYY-MM-DD", true).isValid()) {
-    console.log("Optional Date validation passed.")
+  if (
+    (!req.body.hasOwnProperty("registrationFrom") &&
+      !req.body.hasOwnProperty("registrationTo")) ||
+    (_.isEmpty(req.body.registrationFrom) &&
+      _.isEmpty(req.body.registrationTo)) ||
+    (moment(req.body.registrationTo, "YYYY-MM-DD", true).isValid() &&
+      moment(req.body.registrationFrom, "YYYY-MM-DD", true).isValid())
+  ) {
+    console.log("Optional Date validation passed.");
   } else {
-    resp.status(500).json({ message: 'Invalid Date Format, expected in YYYY-MM-DD' });
+    resp
+      .status(500)
+      .json({ message: "Invalid Date Format, expected in YYYY-MM-DD" });
   }
 
   let queryObjD = [];
-  if ((!_.isEmpty(req.body.registrationFrom) && !_.isEmpty(req.body.registrationTo))) {
+  if (
+    !_.isEmpty(req.body.registrationFrom) &&
+    !_.isEmpty(req.body.registrationTo)
+  ) {
     queryObjD.push({
-      "$match": {
-        "profileRegisteredOn": {
-          "$lte": new Date(req.body.registrationTo),
-          "$gte": new Date(req.body.registrationFrom),
+      $match: {
+        profileRegisteredOn: {
+          $lte: new Date(req.body.registrationTo),
+          $gte: new Date(req.body.registrationFrom),
         },
       },
     });
   }
   queryObjD.push({
-    "$group": {
-      "_id": {
-        "Role": "$role",
+    $group: {
+      _id: {
+        Role: "$role",
       },
-      "count": { "$sum": 1 },
+      count: { $sum: 1 },
     },
   });
 
@@ -540,7 +558,8 @@ router.post("/filter/v2/defaults", async (req, resp) => {
     await mongodb
       .getDb()
       .collection("digitalMapUser")
-      .aggregate(queryObjD).toArray((err, result) => {
+      .aggregate(queryObjD)
+      .toArray((err, result) => {
         if (err) throw err;
         //console.log("* Output rows - " + JSON.stringify(result.length));
         console.log("* Output - " + JSON.stringify(result));
@@ -677,64 +696,78 @@ router.post("/v2/filter", async (req, resp) => {
     } */
   console.log("Filter request - " + JSON.stringify(req.body));
   // resp.send(JSON.stringify(req.body));
-  if ((!req.body.hasOwnProperty('registrationFrom') && !req.body.hasOwnProperty('registrationTo')) ||
-    (_.isEmpty(req.body.registrationFrom) && _.isEmpty(req.body.registrationTo)) ||
-    moment(req.body.registrationTo, "YYYY-MM-DD", true).isValid() && moment(req.body.registrationFrom, "YYYY-MM-DD", true).isValid()) {
-    console.log("Optional Valid dates passed.")
+  if (
+    (!req.body.hasOwnProperty("registrationFrom") &&
+      !req.body.hasOwnProperty("registrationTo")) ||
+    (_.isEmpty(req.body.registrationFrom) &&
+      _.isEmpty(req.body.registrationTo)) ||
+    (moment(req.body.registrationTo, "YYYY-MM-DD", true).isValid() &&
+      moment(req.body.registrationFrom, "YYYY-MM-DD", true).isValid())
+  ) {
+    console.log("Optional Valid dates passed.");
   } else {
-    resp.status(500).json({ message: 'Invalid Date Format, expected in YYYY-MM-DD' });
+    resp
+      .status(500)
+      .json({ message: "Invalid Date Format, expected in YYYY-MM-DD" });
   }
 
   let subQuery = {};
-  if ((!_.isEmpty(req.body.registrationFrom) && !_.isEmpty(req.body.registrationTo))) {
+  if (
+    !_.isEmpty(req.body.registrationFrom) &&
+    !_.isEmpty(req.body.registrationTo)
+  ) {
     subQuery.profileRegisteredOn = {
-      "$lte": (req.body.registrationTo),
-      "$gte": (req.body.registrationFrom),
+      $lte: req.body.registrationTo,
+      $gte: req.body.registrationFrom,
     };
   }
 
-  if (req.body.hasOwnProperty('states') && req.body.states.length) {
+  if (req.body.hasOwnProperty("states") && req.body.states.length) {
     subQuery.stateId = {
-      "$in": req.body.states
-    }
+      $in: req.body.states,
+    };
   }
 
-  if (req.body.hasOwnProperty('stages') && req.body.stages.length) {
+  if (req.body.hasOwnProperty("stages") && req.body.stages.length) {
     subQuery.stage = {
-      "$in": req.body.stages
-    }
+      $in: req.body.stages,
+    };
   }
 
-  if (req.body.hasOwnProperty('roles') && req.body.roles.length) {
+  if (req.body.hasOwnProperty("roles") && req.body.roles.length) {
     subQuery.role = {
-      "$in": req.body.roles
-    }
+      $in: req.body.roles,
+    };
   }
 
-  if (req.body.hasOwnProperty('industries') && req.body.industries.length) {
+  if (req.body.hasOwnProperty("industries") && req.body.industries.length) {
     let inds = [];
     for (let ind of req.body.industries) {
       inds.push(new ObjectId(ind));
     }
-    subQuery['industry._id'] = {
-      "$in": inds,
-    }
+    subQuery["industry._id"] = {
+      $in: inds,
+    };
   }
 
-  if (req.body.hasOwnProperty('sectors') && req.body.sectors.length) {
+  if (req.body.hasOwnProperty("sectors") && req.body.sectors.length) {
     let secs = [];
     for (let sec of req.body.sectors) {
       secs.push(new ObjectId(sec));
     }
-    subQuery['sector._id'] = {
-      "$in": secs,
-    }
+    subQuery["sector._id"] = {
+      $in: secs,
+    };
   }
 
-  if (req.body.hasOwnProperty('badges') && req.body.badges.length && req.body.badges[0] == "true") {
+  if (
+    req.body.hasOwnProperty("badges") &&
+    req.body.badges.length &&
+    req.body.badges[0] == "true"
+  ) {
     subQuery.badges = {
-      "badges": { "$exists": true, "$type": 'array', "$ne": [] }
-    }
+      badges: { $exists: true, $type: "array", $ne: [] },
+    };
   }
 
   // DB CALL
@@ -744,17 +777,18 @@ router.post("/v2/filter", async (req, resp) => {
       .collection("digitalMapUser")
       .aggregate([
         {
-          "$match": subQuery,
+          $match: subQuery,
         },
         {
-          "$group": {
-            "_id": {
-              "Role": "$role",
+          $group: {
+            _id: {
+              Role: "$role",
             },
-            "count": { "$sum": 1 },
+            count: { $sum: 1 },
           },
         },
-      ]).toArray((err, result) => {
+      ])
+      .toArray((err, result) => {
         if (err) throw err;
         //console.log("* Output - " + JSON.stringify(result));
         let output = JSON.parse(JSON.stringify(result));
@@ -831,18 +865,18 @@ router.get("/startupCount/:type", async (req, resp) => {
   let searchObj = {};
   let type = req.params.type;
   switch (type) {
-    case '0':
+    case "0":
       searchObj.role = `${startupTypeKeywordMap[type]}`;
       break;
-    case '1':
-    case '2':
-    case '3':
-    case '4':
-    case '5':
-    case '6':
-    case '7':
-    case '8':
-    case '9':
+    case "1":
+    case "2":
+    case "3":
+    case "4":
+    case "5":
+    case "6":
+    case "7":
+    case "8":
+    case "9":
       searchObj[startupTypeKeywordMap[type]] = true;
       break;
   }
@@ -853,77 +887,86 @@ router.get("/startupCount/:type", async (req, resp) => {
       .collection("digitalMapUser")
       //.count(`${searchQuery}`))
       .count(searchObj);
-    resp.status(200).send(count + '');
-
+    resp.status(200).send(count + "");
   } catch (err) {
     resp.status(500).json({ message: err.message });
   }
 });
 
-router.get("/startupCount/:geoType/:geoIdType/:geoIdValue/:entityType/:from/:to", async (req, resp) => {
-  // #swagger.tags = ['Counts']
-  // #swagger.path = '/startup/startupCount/{geoType}/{geoIdType}/{geoIdValue}/{entityType}/{from}/{to}'
-  // #swagger.description = 'Count for a given startup type at given geography details with date range'
+router.get(
+  "/startupCount/:geoType/:geoIdType/:geoIdValue/:entityType/:from/:to",
+  async (req, resp) => {
+    // #swagger.tags = ['Counts']
+    // #swagger.path = '/startup/startupCount/{geoType}/{geoIdType}/{geoIdValue}/{entityType}/{from}/{to}'
+    // #swagger.description = 'Count for a given startup type at given geography details with date range'
 
-  if (req.params.geoType != 'district' && req.params.geoType != 'state') {
-    resp.status(500).json({ message: 'Invalid Geography Type' });
-  }
-  if (req.params.geoIdType != 'id' && req.params.geoIdType != 'name') {
-    resp.status(500).json({ message: 'Invalid Geography Identifier' });
-  }
-
-  let searchObj = {};
-
-  if (moment(req.params.from, "YYYY-MM-DD", true).isValid() && moment(req.params.to, "YYYY-MM-DD", true).isValid()) {
-    searchObj.profileRegisteredOn = { '$lte': (req.params.to), '$gte': (req.params.from) };
-  } else {
-    resp.status(500).json({ message: 'Invalid Date Format, expected in YYYY-MM-DD' });
-  }
-
-  if (req.params.geoType == 'state') {
-    if (req.params.geoIdType == 'id') {
-      searchObj.stateId = req.params.geoIdValue;
-    } else {
-      searchObj.stateName = req.params.geoIdValue;
+    if (req.params.geoType != "district" && req.params.geoType != "state") {
+      resp.status(500).json({ message: "Invalid Geography Type" });
     }
-  } else {
-    // district
-    if (req.params.geoIdType == 'id') {
-      searchObj.districtId = req.params.geoIdValue;
+    if (req.params.geoIdType != "id" && req.params.geoIdType != "name") {
+      resp.status(500).json({ message: "Invalid Geography Identifier" });
+    }
+
+    let searchObj = {};
+
+    if (
+      moment(req.params.from, "YYYY-MM-DD", true).isValid() &&
+      moment(req.params.to, "YYYY-MM-DD", true).isValid()
+    ) {
+      searchObj.profileRegisteredOn = {
+        $lte: req.params.to,
+        $gte: req.params.from,
+      };
     } else {
-      searchObj.districtName = req.params.geoIdValue;
+      resp
+        .status(500)
+        .json({ message: "Invalid Date Format, expected in YYYY-MM-DD" });
+    }
+
+    if (req.params.geoType == "state") {
+      if (req.params.geoIdType == "id") {
+        searchObj.stateId = req.params.geoIdValue;
+      } else {
+        searchObj.stateName = req.params.geoIdValue;
+      }
+    } else {
+      // district
+      if (req.params.geoIdType == "id") {
+        searchObj.districtId = req.params.geoIdValue;
+      } else {
+        searchObj.districtName = req.params.geoIdValue;
+      }
+    }
+    let type = req.params.entityType;
+    switch (type) {
+      case "0":
+        searchObj.role = `${startupTypeKeywordMap[type]}`;
+        break;
+      case "1":
+      case "2":
+      case "3":
+      case "4":
+      case "5":
+      case "6":
+      case "7":
+      case "8":
+      case "9":
+        searchObj[startupTypeKeywordMap[type]] = true;
+        break;
+    }
+
+    try {
+      let count = await mongodb
+        .getDb()
+        .collection("digitalMapUser")
+        //.count(`${searchQuery}`))
+        .count(searchObj);
+      resp.status(200).send(count + "");
+    } catch (err) {
+      resp.status(500).json({ message: err.message });
     }
   }
-  let type = req.params.entityType;
-  switch (type) {
-    case '0':
-      searchObj.role = `${startupTypeKeywordMap[type]}`;
-      break;
-    case '1':
-    case '2':
-    case '3':
-    case '4':
-    case '5':
-    case '6':
-    case '7':
-    case '8':
-    case '9':
-      searchObj[startupTypeKeywordMap[type]] = true;
-      break;
-  }
-
-  try {
-    let count = await mongodb
-      .getDb()
-      .collection("digitalMapUser")
-      //.count(`${searchQuery}`))
-      .count(searchObj);
-    resp.status(200).send(count + '');
-
-  } catch (err) {
-    resp.status(500).json({ message: err.message });
-  }
-});
+);
 
 router.get("/dpiit/states", (req, resp) => {
   // #swagger.tags = ['Geography']
@@ -1029,7 +1072,7 @@ router.get("/v2/districts/:stateId", async (req, resp) => {
   }
 
   let subQueryDist = {
-    "stateId": { "$eq": req.params.stateId }
+    stateId: { $eq: req.params.stateId },
   };
 
   try {
@@ -1038,29 +1081,36 @@ router.get("/v2/districts/:stateId", async (req, resp) => {
       .collection("digitalMapUser")
       .aggregate([
         {
-          "$match": subQueryDist,
+          $match: subQueryDist,
         },
         {
-          "$group": {
-            "_id": {
-              "role": "$role",
-              "districtid": "$districtId",
-              "district": "$districtName",
-              "stateId": "$stateId",
-              "state": "$stateName",
+          $group: {
+            _id: {
+              role: "$role",
+              districtid: "$districtId",
+              district: "$districtName",
+              stateId: "$stateId",
+              state: "$stateName",
             },
-            "count": { "$sum": 1 },
+            count: { $sum: 1 },
           },
         },
         {
-          "$group": {
-            "_id": "$_id.districtid",
-            "roles": {
-              "$push": { "role": "$_id.role", "district": "$_id.district", "stateId": "$_id.stateId", "state": "$_id.state", "count": "$count" },
+          $group: {
+            _id: "$_id.districtid",
+            roles: {
+              $push: {
+                role: "$_id.role",
+                district: "$_id.district",
+                stateId: "$_id.stateId",
+                state: "$_id.state",
+                count: "$count",
+              },
             },
           },
         },
-      ]).toArray((err, result) => {
+      ])
+      .toArray((err, result) => {
         if (err) throw err;
         let countsArr = [];
         for (let i = 0; i < result.length; i++) {
@@ -1095,27 +1145,35 @@ router.get("/v2/districts", async (req, resp) => {
     await mongodb
       .getDb()
       .collection("digitalMapUser")
-      .aggregate([{
-        "$group": {
-          "_id": {
-            "role": "$role",
-            "districtid": "$districtId",
-            "district": "$districtName",
-            "stateId": "$stateId",
-            "state": "$stateName",
-          },
-          "count": { "$sum": 1 },
-        },
-      },
-      {
-        "$group": {
-          "_id": "$_id.districtid",
-          "roles": {
-            "$push": { "role": "$_id.role", "district": "$_id.district", "stateId": "$_id.stateId", "state": "$_id.state", "count": "$count" },
+      .aggregate([
+        {
+          $group: {
+            _id: {
+              role: "$role",
+              districtid: "$districtId",
+              district: "$districtName",
+              stateId: "$stateId",
+              state: "$stateName",
+            },
+            count: { $sum: 1 },
           },
         },
-      },
-      ]).toArray((err, result) => {
+        {
+          $group: {
+            _id: "$_id.districtid",
+            roles: {
+              $push: {
+                role: "$_id.role",
+                district: "$_id.district",
+                stateId: "$_id.stateId",
+                state: "$_id.state",
+                count: "$count",
+              },
+            },
+          },
+        },
+      ])
+      .toArray((err, result) => {
         if (err) throw err;
         let countsArr = [];
         for (let i = 0; i < result.length; i++) {
@@ -1236,9 +1294,8 @@ function transformCount_Mongo(data) {
 
 //Returns an array of unique items keeping last occurrence of each
 function getUniqueListBy(arr, key) {
-  return [...new Map(arr.map(item => [item[key], item])).values()]
+  return [...new Map(arr.map((item) => [item[key], item])).values()];
 }
-
 
 async function getMyData(geoName) {
   console.log("Getting details for " + geoName);
@@ -1247,7 +1304,7 @@ async function getMyData(geoName) {
   var proA = new Promise((resolve, rej) => {
     request(
       "https://api.startupindia.gov.in/sih/api/noauth/statesPolicy/startup/sectorWise/" +
-      stateName,
+        stateName,
       { json: true },
       (err, res, body) => {
         if (err) {
@@ -1262,7 +1319,7 @@ async function getMyData(geoName) {
   var proB = new Promise((resolve, rej) => {
     request(
       "https://api.startupindia.gov.in/sih/api/noauth/statesPolicy/startup/stageWise/awards/" +
-      stateName,
+        stateName,
       { json: true },
       (err, res, body) => {
         if (err) {
@@ -1277,7 +1334,7 @@ async function getMyData(geoName) {
   var proC = new Promise((resolve, rej) => {
     request(
       "https://api.startupindia.gov.in/sih/api/noauth/statesPolicy/startup/stageWise/funding/" +
-      stateName,
+        stateName,
       { json: true },
       (err, res, body) => {
         if (err) {
@@ -1292,7 +1349,7 @@ async function getMyData(geoName) {
   var proD = new Promise((resolve, rej) => {
     request(
       "https://api.startupindia.gov.in/sih/api/noauth/statesPolicy/startup/stageWise/" +
-      stateName,
+        stateName,
       { json: true },
       (err, res, body) => {
         if (err) {
@@ -1314,6 +1371,5 @@ async function getMyData(geoName) {
       console.log(reason);
     });
 }
-
 
 module.exports = router;
