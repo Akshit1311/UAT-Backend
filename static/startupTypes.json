@@ -1,9 +1,5 @@
 [
   {
-    "index": "0",
-    "text": "All Startups"
-  },
-  {
     "index": "1",
     "text": "DPIIT recognised startups"
   },
@@ -30,9 +26,5 @@
   {
     "index": "8",
     "text": "Current leading Sector"
-  },
-  {
-    "index": "9",
-    "text": "Startup with declared rewards"
   }
 ]
