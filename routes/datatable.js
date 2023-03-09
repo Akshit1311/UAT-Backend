@@ -1824,27 +1824,18 @@ async function populateMultiFieldCountsForCountryV3(from, to, body) {
     count: { $sum: 1 },
   };
   let startupQ = { role: "Startup", dpiitCertified: true };
-  let investorQ = { role: { $eq: "Investor" } };
-  let acceleratorQ = { role: { $eq: "Accelerator" } };
-  let individualQ = { role: { $eq: "Individual" } };
-  let mentorQ = { role: { $eq: "Mentor" } };
-  let govBodyQ = { role: { $eq: "GovernmentBody" } };
-  let incubatorQ = { role: { $eq: "Incubator" } };
-  let womenOwnedQ = {
-    womenOwned: { $eq: true },
-    dpiitCertified: { $eq: "true" },
-  };
-  let seedFundedQ = {
-    seedFunded: { $eq: true },
-    dpiitCertified: { $eq: true },
-  };
-  let taxExemptedQ = {
-    taxExempted: { $eq: true },
-    dpiitCertified: { $eq: true },
-  };
+  let investorQ = { role: "Investor" };
+  let acceleratorQ = { role: "Accelerator" };
+  let individualQ = { role: "Individual" };
+  let mentorQ = { role: "Mentor" };
+  let govBodyQ = { role: "GovernmentBody" };
+  let incubatorQ = { role: "Incubator" };
+  let womenOwnedQ = { womenOwned: true, dpiitCertified: true };
+  let seedFundedQ = { seedFunded: true, dpiitCertified: true };
+  let taxExemptedQ = { taxExempted: true, dpiitCertified: true };
   let dpiitCertifiedQ = { dpiitCertified: true };
-  let showcasedQ = { showcased: { $eq: true }, dpiitCertified: { $eq: true } };
-  let patentedQ = { patented: { $eq: true }, dpiitCertified: { $eq: true } };
+  let showcasedQ = { showcased: true, dpiitCertified: true };
+  let patentedQ = { patented: true, dpiitCertified: true };
 
   let query = [
     { $match: matchQuery },
