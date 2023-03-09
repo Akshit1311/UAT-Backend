@@ -23,7 +23,6 @@ const startupTypes = [
   "dpiitCertified",
   "showcased",
   "seedFunded",
-  "seedFunded",
   "patented",
   "womenOwned",
   "leadingSector",
@@ -56,7 +55,7 @@ router.post("/topNumbers", async (req, resp) => {
   const from = new Date(req.body.from);
   const to = new Date(req.body.to);
   var ObjectId = require("mongodb").ObjectId;
-  console.log(industries);
+  // console.log(industries);
   const state = ObjectId(states[0]);
   const ind = industries.map((e) => (e = ObjectId(e)));
   const sect = sectors.map((e) => (e = ObjectId(e)));
