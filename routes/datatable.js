@@ -1812,7 +1812,7 @@ async function populateMultiFieldCountsForCountryV3(from, to, body) {
   let matchQuery = { profileRegisteredOn: { $lte: to, $gte: from } };
   matchQuery = addAdditionalMatchConditions(matchQuery, body);
   const groupQuery = {
-    _id: { stateId: ObjectId("$stateId"), state: "$stateName" },
+    _id: { stateId: new ObjectId("$stateId"), state: "$stateName" },
     count: { $sum: 1 },
   };
   let startupQ = { role: { $eq: "Startup" } };
@@ -1822,14 +1822,20 @@ async function populateMultiFieldCountsForCountryV3(from, to, body) {
   let mentorQ = { role: { $eq: "Mentor" } };
   let govBodyQ = { role: { $eq: "GovernmentBody" } };
   let incubatorQ = { role: { $eq: "Incubator" } };
-  let womenOwnedQ = {womenOwned: { $eq: true },dpiitCertified: { $eq: true },
+  let womenOwnedQ = {
+    womenOwned: { $eq: true },
+    dpiitCertified: { $eq: true },
   };
-  let seedFundedQ = {seedFunded: { $eq: true },dpiitCertified: { $eq: true },
+  let seedFundedQ = {
+    seedFunded: { $eq: true },
+    dpiitCertified: { $eq: true },
   };
-  let taxExemptedQ = {taxExempted: { $eq: true },dpiitCertified: { $eq: true },
+  let taxExemptedQ = {
+    taxExempted: { $eq: true },
+    dpiitCertified: { $eq: true },
   };
-  let dpiitCertifiedQ = {dpiitCertified: { $eq: true } };
-  let showcasedQ = { showcased: { $eq: true },dpiitCertified: { $eq: true } };
+  let dpiitCertifiedQ = { dpiitCertified: { $eq: true } };
+  let showcasedQ = { showcased: { $eq: true }, dpiitCertified: { $eq: true } };
   let patentedQ = { patented: { $eq: true }, dpiitCertified: { $eq: true } };
 
   let query = [
