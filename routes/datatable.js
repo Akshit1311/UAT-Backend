@@ -402,8 +402,8 @@ router.post(
     output.from = req.params.from;
     output.to = req.params.to;
 
-    const from = req.params.from;
-    const to = req.params.to;
+    const from = new Date(req.params.from);
+    const to = new Date(req.params.to);
 
     if (
       (!_.isEmpty(req.params.from) && !_.isEmpty(req.params.to)) ||
