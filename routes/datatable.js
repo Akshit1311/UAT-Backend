@@ -1809,14 +1809,16 @@ async function populateMultiFieldCountsForStateV3(stateId, from, to, body) {
 }
 
 async function populateMultiFieldCountsForCountryV3(from, to, body) {
-  let matchQuery = { "countryName" : "India", "profileRegisteredOn": { $lte: to, $gte: from } };
+  let matchQuery = {
+    countryName: "India",
+    profileRegisteredOn: { $lte: to, $gte: from },
+  };
   matchQuery = addAdditionalMatchConditions(matchQuery, body);
   const groupQuery = {
-    _id: { stateId: { $toObjectId:"$stateId" }, state: "$stateName" },
+    _id: { stateId: "$stateId", state: "$stateName" },
     count: { $sum: 1 },
   };
-  let startupQ = { role: { $eq: "Startup" },
-  dpiitCertified: { $eq: true } };
+  let startupQ = { role: { $eq: "Startup" }, dpiitCertified: { $eq: true } };
   let investorQ = { role: { $eq: "Investor" } };
   let acceleratorQ = { role: { $eq: "Accelerator" } };
   let individualQ = { role: { $eq: "Individual" } };
