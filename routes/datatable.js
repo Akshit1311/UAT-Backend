@@ -1823,7 +1823,7 @@ async function populateMultiFieldCountsForCountryV3(from, to, body) {
     _id: { stateId: "$stateId", state: "$stateName" },
     count: { $sum: 1 },
   };
-  let startupQ = { role: { $eq: "Startup" }, dpiitCertified: { $eq: true } };
+  let startupQ = { role: "Startup", dpiitCertified: true };
   let investorQ = { role: { $eq: "Investor" } };
   let acceleratorQ = { role: { $eq: "Accelerator" } };
   let individualQ = { role: { $eq: "Individual" } };
@@ -1842,7 +1842,7 @@ async function populateMultiFieldCountsForCountryV3(from, to, body) {
     taxExempted: { $eq: true },
     dpiitCertified: { $eq: true },
   };
-  let dpiitCertifiedQ = { dpiitCertified: { $eq: true } };
+  let dpiitCertifiedQ = { dpiitCertified: true };
   let showcasedQ = { showcased: { $eq: true }, dpiitCertified: { $eq: true } };
   let patentedQ = { patented: { $eq: true }, dpiitCertified: { $eq: true } };
 
