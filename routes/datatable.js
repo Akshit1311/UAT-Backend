@@ -1812,10 +1812,11 @@ async function populateMultiFieldCountsForCountryV3(from, to, body) {
   let matchQuery = { profileRegisteredOn: { $lte: to, $gte: from } };
   matchQuery = addAdditionalMatchConditions(matchQuery, body);
   const groupQuery = {
-    _id: { stateId: new ObjectId("$stateId"), state: "$stateName" },
+    _id: { stateId: "$stateId", state: "$stateName" },
     count: { $sum: 1 },
   };
-  let startupQ = { role: { $eq: "Startup" } };
+  let startupQ = { role: { $eq: "Startup" },
+  dpiitCertified: { $eq: true } };
   let investorQ = { role: { $eq: "Investor" } };
   let acceleratorQ = { role: { $eq: "Accelerator" } };
   let individualQ = { role: { $eq: "Individual" } };
@@ -1824,7 +1825,7 @@ async function populateMultiFieldCountsForCountryV3(from, to, body) {
   let incubatorQ = { role: { $eq: "Incubator" } };
   let womenOwnedQ = {
     womenOwned: { $eq: true },
-    dpiitCertified: { $eq: true },
+    dpiitCertified: { $eq: "true" },
   };
   let seedFundedQ = {
     seedFunded: { $eq: true },
