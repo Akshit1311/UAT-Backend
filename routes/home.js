@@ -11,8 +11,8 @@ const {ObjectId} = require('mongodb');
 
 const roleTypes = ["Startup", "Investor", "Accelerator", "Mentor", "GovernmentBody", "Incubator"];
 
-const startupTypes = ["allStartups","dpiitCertified", "showcased","seedFunded","fundOfFunds",
-"seedFunded","patented","womenOwned", "leadingSector", "declaredRewards"];
+const startupTypes = ["allStartups","dpiitCertified", "showcased","seedFunded",
+"seedFunded","patented","womenOwned", "leadingSector"];
 
 //Get top numbers POST API
 router.post("/topNumbers", async (req, resp) => {

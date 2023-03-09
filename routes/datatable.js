@@ -402,8 +402,8 @@ router.post(
     output.from = req.params.from;
     output.to = req.params.to;
 
-    const from = new Date(req.params.from);
-    const to = new Date(req.params.to);
+    const from = req.params.from;
+    const to = req.params.to;
 
     if (
       (!_.isEmpty(req.params.from) && !_.isEmpty(req.params.to)) ||
@@ -1816,124 +1816,62 @@ async function populateMultiFieldCountsForCountryV3(from, to, body) {
     count: { $sum: 1 },
   };
   let startupQ = { role: { $eq: "Startup" } };
-  // startupQ = addAdditionalMatchConditions(startupQ, body);
-  // console.log("start");
-  // console.log(startupQ);
-
   let investorQ = { role: { $eq: "Investor" } };
-  // investorQ = addAdditionalMatchConditions(investorQ, body);
-
   let acceleratorQ = { role: { $eq: "Accelerator" } };
-  // acceleratorQ = addAdditionalMatchConditions(acceleratorQ, body);
-
   let individualQ = { role: { $eq: "Individual" } };
-  // individualQ = addAdditionalMatchConditions(individualQ, body);
-
   let mentorQ = { role: { $eq: "Mentor" } };
-  // mentorQ = addAdditionalMatchConditions(mentorQ, body);
-
   let govBodyQ = { role: { $eq: "GovernmentBody" } };
-  // govBodyQ = addAdditionalMatchConditions(govBodyQ, body);
-
   let incubatorQ = { role: { $eq: "Incubator" } };
-  // incubatorQ = addAdditionalMatchConditions(incubatorQ, body);
-
-  let womenOwnedQ = { womenOwned: { $eq: true } };
-  // womenOwnedQ = addAdditionalMatchConditions(womenOwnedQ, body);
-
-  let seedFundedQ = { seedFunded: { $eq: true } };
-  // seedFundedQ = addAdditionalMatchConditions(seedFundedQ, body);
-
-  let taxExemptedQ = { taxExempted: { $eq: true } };
-  // taxExemptedQ = addAdditionalMatchConditions(taxExemptedQ, body);
-
+  let womenOwnedQ = {
+    womenOwned: { $eq: true },
+    dpiitCertified: { $eq: true },
+  };
+  let seedFundedQ = {
+    seedFunded: { $eq: true },
+    dpiitCertified: { $eq: true },
+  };
+  let taxExemptedQ = {
+    taxExempted: { $eq: true },
+    dpiitCertified: { $eq: true },
+  };
   let dpiitCertifiedQ = { dpiitCertified: { $eq: true } };
-  // dpiitCertifiedQ = addAdditionalMatchConditions(dpiitCertifiedQ, body);
-
-  let ffsQ = { fundOfFunds: { $eq: true } };
-  // ffsQ = addAdditionalMatchConditions(ffsQ, body);
-
   let showcasedQ = { showcased: { $eq: true } };
-  // showcasedQ = addAdditionalMatchConditions(showcasedQ, body);
-
   let patentedQ = { patented: { $eq: true } };
-  // patentedQ = addAdditionalMatchConditions(patentedQ, body);
 
   let query = [
     { $match: matchQuery },
     {
       $facet: {
         Startup: [{ $match: startupQ }, { $group: groupQuery }],
-        // "Investor": [
-        //   { "$match": investorQ },
-        //   { "$group": groupQuery, },
-        // ],
-        // "Accelerator": [
-        //   { "$match": acceleratorQ },
-        //   { "$group": groupQuery, },
-        // ],
-        // "Individual": [
-        //   { "$match": individualQ },
-        //   { "$group": groupQuery, },
-        // ],
-        // "Mentor": [
-        //   { "$match": mentorQ },
-        //   { "$group": groupQuery, },
-        // ],
-        // "GovernmentBody": [
-        //   { "$match": govBodyQ },
-        //   { "$group": groupQuery, },
-        // ],
-        // "Incubator": [
-        //   { "$match": incubatorQ },
-        //   { "$group": groupQuery, },
-        // ],
-        // "WomenOwned": [
-        //   { "$match": womenOwnedQ },
-        //   { "$group": groupQuery, },
-        // ],
-        // "SeedFunded": [
-        //   { "$match": seedFundedQ },
-        //   { "$group": groupQuery, },
-        // ],
-        // "TaxExempted": [
-        //   { "$match": taxExemptedQ },
-        //   { "$group": groupQuery, },
-        // ],
-        // "DpiitCertified": [
-        //   { "$match": dpiitCertifiedQ },
-        //   { "$group": groupQuery, },
-        // ],
-        // "FFS": [
-        //   { "$match": ffsQ },
-        //   { "$group": groupQuery, },
-        // ],
-        // "ShowcasedStartups": [
-        //   { "$match": showcasedQ },
-        //   { "$group": groupQuery, },
-        // ],
-        // "PatentStartup": [
-        //   { "$match": patentedQ },
-        //   { "$group": groupQuery, },
-        // ]
+        Investor: [{ $match: investorQ }, { $group: groupQuery }],
+        Accelerator: [{ $match: acceleratorQ }, { $group: groupQuery }],
+        Individual: [{ $match: individualQ }, { $group: groupQuery }],
+        Mentor: [{ $match: mentorQ }, { $group: groupQuery }],
+        GovernmentBody: [{ $match: govBodyQ }, { $group: groupQuery }],
+        Incubator: [{ $match: incubatorQ }, { $group: groupQuery }],
+        WomenOwned: [{ $match: womenOwnedQ }, { $group: groupQuery }],
+        SeedFunded: [{ $match: seedFundedQ }, { $group: groupQuery }],
+        TaxExempted: [{ $match: taxExemptedQ }, { $group: groupQuery }],
+        DpiitCertified: [{ $match: dpiitCertifiedQ }, { $group: groupQuery }],
+        ShowcasedStartups: [{ $match: showcasedQ }, { $group: groupQuery }],
+        PatentStartup: [{ $match: patentedQ }, { $group: groupQuery }],
       },
     },
     {
       $project: {
         Startup: ["$Startup"],
-        // "Investor": ["$Investor"],
-        // "Accelerator": ["$Accelerator"],
-        // "Individual": ["$Individual"],
-        // "Mentor": ["$Mentor"],
-        // "GovernmentBody": ["$GovernmentBody"],
-        // "Incubator": ["$Incubator"],
-        // "WomenOwned": ["$WomenOwned"],
-        // "SeedFunded": ["$SeedFunded"],
-        // "TaxExempted": ["$TaxExempted"],
-        // "DpiitCertified": ["$DpiitCertified"],
-        // "ShowcasedStartups": ["$ShowcasedStartups"],
-        // "PatentStartup": ["$PatentStartup"],
-        // "FFS": ["$FFS"]
+        Investor: ["$Investor"],
+        Accelerator: ["$Accelerator"],
+        Individual: ["$Individual"],
+        Mentor: ["$Mentor"],
+        GovernmentBody: ["$GovernmentBody"],
+        Incubator: ["$Incubator"],
+        WomenOwned: ["$WomenOwned"],
+        SeedFunded: ["$SeedFunded"],
+        TaxExempted: ["$TaxExempted"],
+        DpiitCertified: ["$DpiitCertified"],
+        ShowcasedStartups: ["$ShowcasedStartups"],
+        PatentStartup: ["$PatentStartup"],
       },
     },
   ];
