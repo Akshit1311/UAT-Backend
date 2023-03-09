@@ -431,7 +431,9 @@ router.post(
         to,
         req.body
       );
-
+      console.log("===============================");
+      console.log(JSON.stringify(countryCounts));
+      console.log("===============================");
       let map = new Map();
       // items = states
       let items = Object.keys(countryCounts);
@@ -461,6 +463,9 @@ router.post(
 
       let countsArr = [];
       for (let [key, val] of map.entries()) {
+        console.log("===============================");
+        console.log(`${key}==${JSON.stringify(val)}`);
+        console.log("===============================");
         let state = {};
         let count = JSON.parse(JSON.stringify(dataCountJson));
 
