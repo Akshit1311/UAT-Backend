@@ -446,8 +446,15 @@ router.post(
           let x = v[j];
           let c = x.count;
           x = x._id;
-
-          if (map.has(x.stateId.toString())) {
+          let stId='';
+          if (x.stateId==null){
+            continue;
+          }
+          else {
+            stId=x.stateId.toString();
+          }
+         
+          if (map.has(stId)) {
             console.log("state exists", x.stateId.toString());
             let countData = map.get(x.stateId);
             countData.statistics[key] = c;
