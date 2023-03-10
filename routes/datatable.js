@@ -506,7 +506,7 @@ router.post(
       // console.log('stateId =',stateId);
 
       let stateCounts = await populateMultiFieldCountsForStateV3(
-        stateId,
+        ObjectId(stateId),
         from,
         to,
         req.body
@@ -1520,54 +1520,32 @@ async function populateMultiFieldCountsForStateV2(stateId, from, to) {
 }
 
 async function populateMultiFieldCountsForStateV3(stateId, from, to, body) {
-  const matchQuery = {
-    $match: {
-      stateId: { $eq: stateId },
-      profileRegisteredOn: { $lte: to, $gte: from },
-    },
+  let matchQuery = {
+    $match: { stateId: stateId, profileRegisteredOn: { $lte: to, $gte: from } },
   };
-
-  let startupQ = { role: { $eq: "Startup" } };
-  startupQ = addAdditionalMatchConditions(startupQ, body);
-
-  let investorQ = { role: { $eq: "Investor" } };
-  investorQ = addAdditionalMatchConditions(investorQ, body);
-
-  let acceleratorQ = { role: { $eq: "Accelerator" } };
-  acceleratorQ = addAdditionalMatchConditions(acceleratorQ, body);
-
-  let individualQ = { role: { $eq: "Individual" } };
-  individualQ = addAdditionalMatchConditions(individualQ, body);
-
-  let mentorQ = { role: { $eq: "Mentor" } };
-  mentorQ = addAdditionalMatchConditions(mentorQ, body);
-
-  let govBodyQ = { role: { $eq: "GovernmentBody" } };
-  govBodyQ = addAdditionalMatchConditions(govBodyQ, body);
-
-  let incubatorQ = { role: { $eq: "Incubator" } };
-  incubatorQ = addAdditionalMatchConditions(incubatorQ, body);
-
-  let womenOwnedQ = { womenOwned: { $eq: true } };
-  womenOwnedQ = addAdditionalMatchConditions(womenOwnedQ, body);
-
-  let seedFundedQ = { seedFunded: { $eq: true } };
-  seedFundedQ = addAdditionalMatchConditions(seedFundedQ, body);
-
-  let taxExemptedQ = { taxExempted: { $eq: true } };
-  taxExemptedQ = addAdditionalMatchConditions(taxExemptedQ, body);
-
-  let dpiitCertifiedQ = { dpiitCertified: { $eq: true } };
-  dpiitCertifiedQ = addAdditionalMatchConditions(dpiitCertifiedQ, body);
-
-  let ffsQ = { fundOfFunds: { $eq: true } };
-  ffsQ = addAdditionalMatchConditions(ffsQ, body);
-
-  let showcasedQ = { showcased: { $eq: true } };
-  showcasedQ = addAdditionalMatchConditions(showcasedQ, body);
-
-  let patentedQ = { patented: { $eq: true } };
-  patentedQ = addAdditionalMatchConditions(patentedQ, body);
+  matchQuery = addAdditionalMatchConditions(matchQuery, body);
+  const groupQuery = {
+    _id: {
+      stateId: "$stateId",
+      state: "$stateName",
+      districtId: "$districtId",
+      district: "$districtName",
+    },
+    count: { $sum: 1 },
+  };
+  let startupQ = { role: "Startup", dpiitCertified: true };
+  let investorQ = { role: "Investor" };
+  let acceleratorQ = { role: "Accelerator" };
+  let individualQ = { role: "Individual" };
+  let mentorQ = { role: "Mentor" };
+  let govBodyQ = { role: "GovernmentBody" };
+  let incubatorQ = { role: "Incubator" };
+  let womenOwnedQ = { womenOwned: true, dpiitCertified: true };
+  let seedFundedQ = { seedFunded: true, dpiitCertified: true };
+  let taxExemptedQ = { taxExempted: true, dpiitCertified: true };
+  let dpiitCertifiedQ = { dpiitCertified: true };
+  let showcasedQ = { showcased: true, dpiitCertified: true };
+  let patentedQ = { patented: true, dpiitCertified: true };
 
   let query = [
     matchQuery,
@@ -1576,197 +1554,79 @@ async function populateMultiFieldCountsForStateV3(stateId, from, to, body) {
         Startup: [
           { $match: startupQ },
           {
-            $group: {
-              _id: {
-                stateId: "$stateId",
-                state: "$stateName",
-                districtId: "$districtId",
-                district: "$districtName",
-              },
-              count: { $sum: 1 },
-            },
+            $group: groupQuery,
           },
         ],
         Investor: [
           { $match: investorQ },
           {
-            $group: {
-              _id: {
-                stateId: "$stateId",
-                state: "$stateName",
-                districtId: "$districtId",
-                district: "$districtName",
-              },
-              count: { $sum: 1 },
-            },
+            $group: groupQuery,
           },
         ],
         Accelerator: [
           { $match: acceleratorQ },
           {
-            $group: {
-              _id: {
-                stateId: "$stateId",
-                state: "$stateName",
-                districtId: "$districtId",
-                district: "$districtName",
-              },
-              count: { $sum: 1 },
-            },
+            $group: groupQuery,
           },
         ],
         Individual: [
           { $match: individualQ },
           {
-            $group: {
-              _id: {
-                stateId: "$stateId",
-                state: "$stateName",
-                districtId: "$districtId",
-                district: "$districtName",
-              },
-              count: { $sum: 1 },
-            },
+            $group: groupQuery,
           },
         ],
         Mentor: [
           { $match: mentorQ },
           {
-            $group: {
-              _id: {
-                stateId: "$stateId",
-                state: "$stateName",
-                districtId: "$districtId",
-                district: "$districtName",
-              },
-              count: { $sum: 1 },
-            },
+            $group: groupQuery,
           },
         ],
         GovernmentBody: [
           { $match: govBodyQ },
           {
-            $group: {
-              _id: {
-                stateId: "$stateId",
-                state: "$stateName",
-                districtId: "$districtId",
-                district: "$districtName",
-              },
-              count: { $sum: 1 },
-            },
+            $group: groupQuery,
           },
         ],
         Incubator: [
           { $match: incubatorQ },
           {
-            $group: {
-              _id: {
-                stateId: "$stateId",
-                state: "$stateName",
-                districtId: "$districtId",
-                district: "$districtName",
-              },
-              count: { $sum: 1 },
-            },
+            $group: groupQuery,
           },
         ],
         WomenOwned: [
           { $match: womenOwnedQ },
           {
-            $group: {
-              _id: {
-                stateId: "$stateId",
-                state: "$stateName",
-                districtId: "$districtId",
-                district: "$districtName",
-              },
-              count: { $sum: 1 },
-            },
+            $group: groupQuery,
           },
         ],
         SeedFunded: [
           { $match: seedFundedQ },
           {
-            $group: {
-              _id: {
-                stateId: "$stateId",
-                state: "$stateName",
-                districtId: "$districtId",
-                district: "$districtName",
-              },
-              count: { $sum: 1 },
-            },
+            $group: groupQuery,
           },
         ],
         TaxExempted: [
           { $match: taxExemptedQ },
           {
-            $group: {
-              _id: {
-                stateId: "$stateId",
-                state: "$stateName",
-                districtId: "$districtId",
-                district: "$districtName",
-              },
-              count: { $sum: 1 },
-            },
+            $group: groupQuery,
           },
         ],
         DpiitCertified: [
           { $match: dpiitCertifiedQ },
           {
-            $group: {
-              _id: {
-                stateId: "$stateId",
-                state: "$stateName",
-                districtId: "$districtId",
-                district: "$districtName",
-              },
-              count: { $sum: 1 },
-            },
-          },
-        ],
-        FFS: [
-          { $match: ffsQ },
-          {
-            $group: {
-              _id: {
-                stateId: "$stateId",
-                state: "$stateName",
-                districtId: "$districtId",
-                district: "$districtName",
-              },
-              count: { $sum: 1 },
-            },
+            $group: groupQuery,
           },
         ],
         ShowcasedStartups: [
           { $match: showcasedQ },
           {
-            $group: {
-              _id: {
-                stateId: "$stateId",
-                state: "$stateName",
-                districtId: "$districtId",
-                district: "$districtName",
-              },
-              count: { $sum: 1 },
-            },
+            $group: groupQuery,
           },
         ],
         PatentStartup: [
           { $match: patentedQ },
           {
-            $group: {
-              _id: {
-                stateId: "$stateId",
-                state: "$stateName",
-                districtId: "$districtId",
-                district: "$districtName",
-              },
-              count: { $sum: 1 },
-            },
+            $group: groupQuery,
           },
         ],
       },
@@ -1786,7 +1646,6 @@ async function populateMultiFieldCountsForStateV3(stateId, from, to, body) {
         DpiitCertified: ["$DpiitCertified"],
         ShowcasedStartups: ["$ShowcasedStartups"],
         PatentStartup: ["$PatentStartup"],
-        FFS: ["$FFS"],
       },
     },
   ];
