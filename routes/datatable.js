@@ -446,29 +446,28 @@ router.post(
           let x = v[j];
           let c = x.count;
           x = x._id;
-          let stId='';
-          if (x.stateId==null){
+          let stId = "";
+          if (x.stateId == null) {
             continue;
+          } else {
+            stId = x.stateId.toString();
           }
-          else {
-            stId=x.stateId.toString();
-          }
-         
+
           if (map.has(stId)) {
-            console.log("state exists", x.stateId.toString());
-            let countData = map.get(x.stateId);
+            console.log("state exists", stId);
+            let countData = map.get(stId);
             countData.statistics[key] = c;
-            map.set(x.stateId.toString(), countData);
+            map.set(stId, countData);
           } else {
             counter++;
-            console.log(`counter ${counter} - stateid ${x.stateId.toString()}`);
+            console.log(`counter ${counter} - stateid ${stId}`);
             let placeholder = JSON.parse(JSON.stringify(dataCountJson));
             placeholder[key] = c;
             let data = {};
-            data.stateId = x.stateId;
+            data.stateId = stId;
             data.state = x.state;
             data.statistics = placeholder;
-            map.set(x.stateId.toString(), data);
+            map.set(stId, data);
           }
         }
       }
