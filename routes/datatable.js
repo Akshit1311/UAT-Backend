@@ -396,12 +396,11 @@ router.post(
           "$stages": ["Scaling", "EarlyTraction", "Validation"],
         }
     } */
-    // console.log("Data Table request - " + JSON.stringify(req.body));
-
+    //Initialize output json
     var output = {};
     output.from = req.params.from;
     output.to = req.params.to;
-
+    //change requested parameters to date type for PROD
     const from = new Date(req.params.from);
     const to = new Date(req.params.to);
 
@@ -422,21 +421,16 @@ router.post(
       $lte: to,
       $gte: from,
     };
-    // resp.send(JSON.stringify(req.params));
-    var result = [];
+
+    //In case api is called for country
     if (req.params.geographicalEntity == "country") {
-      // Country - India level
       let countryCounts = await populateMultiFieldCountsForCountryV3(
         from,
         to,
         req.body
       );
-      console.log("===============================");
-      console.log(JSON.stringify(countryCounts));
-      console.log("===============================");
       let map = new Map();
-      // items = states
-      let counter = 0;
+      //Capture the array of counts retrieved from mongo
       let items = Object.keys(countryCounts);
       for (let i = 0; i < items.length; i++) {
         let key = items[i];
@@ -446,6 +440,8 @@ router.post(
           let x = v[j];
           let c = x.count;
           x = x._id;
+
+          //If state id is null then ignore otherwise convert stateid to string
           let stId = "";
           if (x.stateId == null) {
             continue;
@@ -453,14 +449,12 @@ router.post(
             stId = x.stateId.toString();
           }
 
+          //IF state id already exists then update count otherise add record
           if (map.has(stId)) {
-            console.log("state exists", stId);
             let countData = map.get(stId);
             countData.statistics[key] = c;
             map.set(stId, countData);
           } else {
-            counter++;
-            console.log(`counter ${counter} - stateid ${stId}`);
             let placeholder = JSON.parse(JSON.stringify(dataCountJson));
             placeholder[key] = c;
             let data = {};
@@ -472,11 +466,9 @@ router.post(
         }
       }
 
+      //Push all values statewise in a states array
       let countsArr = [];
       for (let [key, val] of map.entries()) {
-        console.log("===============================");
-        console.log(`${key}==${JSON.stringify(val)}`);
-        console.log("===============================");
         let state = {};
         let count = JSON.parse(JSON.stringify(dataCountJson));
 
