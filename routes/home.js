@@ -206,6 +206,7 @@ router.post("/startupCounts/:startupType", async (req, resp) => {
   const ind = industries.map((e) => (e = ObjectId(e)));
   const sect = sectors.map((e) => (e = ObjectId(e)));
   const state = ObjectId(states[0]);
+  const district = ObjectId(req.body.districtId);
   //Building default body set for building final queries based on input parameters
   const obj = {
     country: { countryName: "India" },
@@ -213,7 +214,7 @@ router.post("/startupCounts/:startupType", async (req, resp) => {
     profileRegisteredOn: { profileRegisteredOn: { $gte: from, $lte: to } },
     states: { stateId: state },
     // stateId: { "stateId": req.body.stateId },
-    districtId: { districtId: req.body.districtId },
+    districtId: { districtId: district },
     industries: { "industry._id": { $in: ind } },
     sectors: { "sector._id": { $in: sect } },
     stages: { stage: { $in: stages } },
@@ -282,10 +283,10 @@ router.post("/leadingSector", async (req, resp) => {
 
   //Building default body set for building final queries based on input parameters
   const obj = {
-    country: { countryName:"India"},
-    role: { role:"Startup"},
+    country: { countryName: "India" },
+    role: { role: "Startup" },
     profileRegisteredOn: { profileRegisteredOn: { $gte: from, $lte: to } },
-    stateId: { stateId: state },
+    states: { stateId: state },
     // stateId: { "stateId": req.body.stateId },
     districtId: { districtId: district },
     industries: { "industry._id": { $in: ind } },
