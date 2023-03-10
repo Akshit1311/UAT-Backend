@@ -282,10 +282,10 @@ router.post("/leadingSector", async (req, resp) => {
 
   //Building default body set for building final queries based on input parameters
   const obj = {
-    country: { countryName: { $eq: "India" } },
-    role: { role: { $eq: "Startup" } },
+    country: { countryName:"India"},
+    role: { role:"Startup"},
     profileRegisteredOn: { profileRegisteredOn: { $gte: from, $lte: to } },
-    states: { stateId: state },
+    stateId: { stateId: state },
     // stateId: { "stateId": req.body.stateId },
     districtId: { districtId: district },
     industries: { "industry._id": { $in: ind } },
