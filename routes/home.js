@@ -111,7 +111,15 @@ router.get("/startupCounts", async (req, resp) => {
   const badges = [];
   const types = [];
 
-  checkBody(req.query, acceptedParams,states, industries, sectors, stages, badges);
+  checkBody(
+    req.query,
+    acceptedParams,
+    states,
+    industries,
+    sectors,
+    stages,
+    badges
+  );
   if (!_.isEmpty(req.query.type)) {
     types.push(req.query.type);
   }
@@ -124,7 +132,7 @@ router.get("/startupCounts", async (req, resp) => {
     role: { role: "Startup" },
     profileRegisteredOn: { profileRegisteredOn: { $gte: from, $lte: to } },
     stateId: { stateId: state },
-    districtId: { districtId:district },
+    districtId: { districtId: district },
     industries: { "industry._id": { $in: industries } },
     sectors: { "sector._id": { $in: sectors } },
     stages: { stage: { $in: stages } },
@@ -270,6 +278,7 @@ router.post("/leadingSector", async (req, resp) => {
   const ind = industries.map((e) => (e = ObjectId(e)));
   const sect = sectors.map((e) => (e = ObjectId(e)));
   const state = ObjectId(states[0]);
+  const district = ObjectId(req.body.districtId);
 
   //Building default body set for building final queries based on input parameters
   const obj = {
@@ -278,7 +287,7 @@ router.post("/leadingSector", async (req, resp) => {
     profileRegisteredOn: { profileRegisteredOn: { $gte: from, $lte: to } },
     states: { stateId: state },
     // stateId: { "stateId": req.body.stateId },
-    districtId: { districtId: req.body.districtId },
+    districtId: { districtId: district },
     industries: { "industry._id": { $in: ind } },
     sectors: { "sector._id": { $in: sect } },
     stages: { stage: { $in: stages } },
