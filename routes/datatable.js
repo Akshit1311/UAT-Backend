@@ -436,9 +436,11 @@ router.post(
       console.log("===============================");
       let map = new Map();
       // items = states
+      let counter = 0;
       let items = Object.keys(countryCounts);
       for (let i = 0; i < items.length; i++) {
         let key = items[i];
+
         let v = countryCounts[key].length ? countryCounts[key][0] : [];
         for (let j = 0; j < v.length; j++) {
           let x = v[j];
@@ -446,10 +448,13 @@ router.post(
           x = x._id;
 
           if (map.has(x.stateId)) {
+            console.log("state exists", x.stateId);
             let countData = map.get(x.stateId);
             countData.statistics[key] = c;
             map.set(x.stateId, countData);
           } else {
+            counter++;
+            console.log("counter", counter);
             let placeholder = JSON.parse(JSON.stringify(dataCountJson));
             placeholder[key] = c;
             let data = {};
