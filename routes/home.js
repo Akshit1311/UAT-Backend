@@ -111,19 +111,20 @@ router.get("/startupCounts", async (req, resp) => {
   const badges = [];
   const types = [];
 
-  checkBody(req.query, acceptedParams, industries, sectors, stages, badges);
+  checkBody(req.query, acceptedParams,states, industries, sectors, stages, badges);
   if (!_.isEmpty(req.query.type)) {
     types.push(req.query.type);
   }
   const from = req.query.from;
   const to = req.query.to;
-
+  const state = ObjectId(req.query.stateId);
+  const district = ObjectId(req.query.districtId);
   //Building default body set for building final queries based on input parameters
   const obj = {
-    role: { role: { $eq: "Startup" } },
+    role: { role: "Startup" },
     profileRegisteredOn: { profileRegisteredOn: { $gte: from, $lte: to } },
-    stateId: { stateId: req.query.stateId },
-    districtId: { districtId: req.query.districtId },
+    stateId: { stateId: state },
+    districtId: { districtId:district },
     industries: { "industry._id": { $in: industries } },
     sectors: { "sector._id": { $in: sectors } },
     stages: { stage: { $in: stages } },
