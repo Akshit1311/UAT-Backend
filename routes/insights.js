@@ -8,7 +8,7 @@ router.get("/industryInsights", async (req, resp) => {
   //This Api returns insights i.e. industry wise counts and their percentages
   let stateId = "";
   if (!_.isEmpty(req.query.stateId)) {
-    stateId = ObjectId(req.query.stateId);
+    stateId = req.query.stateId;
   }
   // let totalCount = await getTotalCount(stateId);
   let industryWiseCounts = await getIndustryWiseCounts(stateId);
@@ -16,7 +16,9 @@ router.get("/industryInsights", async (req, resp) => {
   let output = [];
   industryWiseCounts.forEach((e) => {
     // let percentage = (totalCount)? (e.count*100/totalCount).toFixed(2):0;
-    output.push({ industry: e._id, count: e.count, percentage: 0 });
+    if (e._id != "") {
+      output.push({ industry: e._id, count: e.count, percentage: 0 });
+    }
   });
   resp.send(output);
 });
@@ -25,7 +27,7 @@ router.get("/industryInsights", async (req, resp) => {
 router.get("/sectorInsights", async (req, resp) => {
   let stateId = "";
   if (!_.isEmpty(req.query.stateId)) {
-    stateId = ObjectId(req.query.stateId);
+    stateId = req.query.stateId;
   }
   // let totalSectorCount = await getTotalSectorCount(stateId);
   let sectorWiseCounts = await getSectorWiseCounts(stateId);
@@ -34,7 +36,9 @@ router.get("/sectorInsights", async (req, resp) => {
     // let percentage = totalSectorCount
     //   ? ((e.count * 100) / totalSectorCount).toFixed(2)
     //   : 0;
-    output.push({ sector: e._id, count: e.count, percentage: 0 });
+    if (e._id != "") {
+      output.push({ sector: e._id, count: e.count, percentage: 0 });
+    }
   });
   resp.send(output);
 });
@@ -44,7 +48,7 @@ router.get("/stageInsights", async (req, resp) => {
   //This Api returns insights i.e. sector wise counts and their percentages
   let stateId = "";
   if (!_.isEmpty(req.query.stateId)) {
-    stateId = ObjectId(req.query.stateId);
+    stateId = req.query.stateId;
   }
 
   // let totalStageCount = await getTotalStageCount(stateId);
@@ -170,9 +174,12 @@ async function getTotalStageCount(stateId = "") {
 }
 
 async function getIndustryWiseCounts(stateId = "") {
-  let matchQuery = { "industry.name": { $exists: true, $ne: null } };
+  let matchQuery = { "industry.name": { $exists: true } };
   if (stateId != "") {
-    matchQuery = { stateId: { $eq: stateId }, "industry.name": { $ne: "" } };
+    matchQuery = {
+      stateId:  stateId ,
+      "industry.name": { $exists: true },
+    };
   }
   const queryIndwiseCount = [
     { $unwind: { path: "$industry" } },
@@ -207,26 +214,15 @@ async function getIndustryWiseCounts(stateId = "") {
 }
 
 async function getSectorWiseCounts(stateId = "") {
-  let matchQuery = {
-    $and: [
-      { role: "Startup" },
-      { "sector.name": { $exists: true, $ne: null } },
-    ],
-  };
+  let matchQuery = { role: "Startup" };
   if (stateId != "") {
-    matchQuery = {
-      $and: [
-        { stateId: { $eq: stateId } },
-        { role: "Startup" },
-        { "sector.name": { $ne: "" } },
-      ],
-    };
+    matchQuery = { stateId: stateId, role: "Startup" };
   }
   const querySectorwiseCount = [
     { $unwind: { path: "$sector" } },
     { $match: matchQuery },
     { $group: { _id: "$sector.name", count: { $sum: 1 } } },
-    // { $sort:    { "_id":1 } }
+    { $sort: { _id: 1 } },
   ];
 
   var prom = new Promise((resolve, rej) => {
@@ -255,16 +251,11 @@ async function getSectorWiseCounts(stateId = "") {
 }
 
 async function getStageWiseCounts(stateId = "") {
-  let matchQuery = { $and: [{ role: "Startup" }, { stage: { $ne: "" } }] };
+  let matchQuery = { role: "Startup" };
   if (stateId != "") {
-    matchQuery = {
-      $and: [
-        { stateId: { $eq: stateId } },
-        { role: "Startup" },
-        { stage: { $ne: "" } },
-      ],
-    };
+    matchQuery = { stateId: stateId, role: "Startup" };
   }
+
   const queryStagewiseCount = [
     { $match: matchQuery },
     { $group: { _id: "$stage", count: { $sum: 1 } } },
