@@ -35,7 +35,6 @@ var dataCountJson = {
   DpiitCertified: 0,
   TaxExempted: 0,
   WomenLed: 0,
-  FFS: 0,
   PatentStartup: 0,
   SeedFundStartup: 0,
   ShowcasedStartups: 0,
@@ -54,7 +53,6 @@ var dataCountOthers = {
   DpiitCertified: 0,
   ShowcasedStartups: 0,
   SeedFunded: 0,
-  FFS: 0,
   Patented: 0,
   WomenLed: 0,
   LeadingSector: 0,
@@ -484,7 +482,6 @@ router.post(
           val.statistics.ShowcasedStartups
         );
         count.SeedFundStartup = fillUndefined(val.statistics.SeedFunded);
-        count.FFS = fillUndefined(val.statistics.FFS);
         count.DpiitCertified = fillUndefined(val.statistics.DpiitCertified);
         count.PatentStartup = fillUndefined(val.statistics.PatentStartup);
         count.Startup = fillUndefined(val.statistics.Startup);
@@ -557,7 +554,6 @@ router.post(
           val.statistics.ShowcasedStartups
         );
         count.SeedFundStartup = fillUndefined(val.statistics.SeedFunded);
-        count.FFS = fillUndefined(val.statistics.FFS);
         count.DpiitCertified = fillUndefined(val.statistics.DpiitCertified);
         count.PatentStartup = fillUndefined(val.statistics.PatentStartup);
         count.Startup = fillUndefined(val.statistics.Startup);
@@ -1114,16 +1110,7 @@ async function populateMultiFieldCountsForState(stateId, from, to) {
           },
           { $count: "DpiitCertified" },
         ],
-        FFS: [
-          {
-            $match: {
-              fundOfFunds: { $eq: true },
-              stateId: { $eq: stateId },
-              profileRegisteredOn: { $lte: to, $gte: from },
-            },
-          },
-          { $count: "FFS" },
-        ],
+        
         ShowcasedStartups: [
           {
             $match: {
@@ -1156,7 +1143,6 @@ async function populateMultiFieldCountsForState(stateId, from, to) {
           $arrayElemAt: ["$ShowcasedStartups.ShowcasedStartups", 0],
         },
         PatentStartup: { $arrayElemAt: ["$PatentStartup.PatentStartup", 0] },
-        FFS: { $arrayElemAt: ["$FFS.FFS", 0] },
       },
     },
   ];
@@ -1412,26 +1398,7 @@ async function populateMultiFieldCountsForStateV2(stateId, from, to) {
             },
           },
         ],
-        FFS: [
-          {
-            $match: {
-              fundOfFunds: { $eq: true },
-              stateId: { $eq: stateId },
-              profileRegisteredOn: { $lte: to, $gte: from },
-            },
-          },
-          {
-            $group: {
-              _id: {
-                stateId: "$stateId",
-                state: "$stateName",
-                districtId: "$districtId",
-                district: "$districtName",
-              },
-              count: { $sum: 1 },
-            },
-          },
-        ],
+        
         ShowcasedStartups: [
           {
             $match: {
@@ -1489,7 +1456,6 @@ async function populateMultiFieldCountsForStateV2(stateId, from, to) {
         DpiitCertified: ["$DpiitCertified"],
         ShowcasedStartups: ["$ShowcasedStartups"],
         PatentStartup: ["$PatentStartup"],
-        FFS: ["$FFS"],
       },
     },
   ];
@@ -1825,10 +1791,7 @@ async function populateMultiFieldCountsForCountry(from, to) {
           { $match: { dpiitCertified: { $eq: true } } },
           { $group: groupQuery },
         ],
-        FFS: [
-          { $match: { fundOfFunds: { $eq: true } } },
-          { $group: groupQuery },
-        ],
+       
         ShowcasedStartups: [
           { $match: { showcased: { $eq: true } } },
           { $group: groupQuery },
@@ -1854,7 +1817,7 @@ async function populateMultiFieldCountsForCountry(from, to) {
         DpiitCertified: ["$DpiitCertified"],
         ShowcasedStartups: ["$ShowcasedStartups"],
         PatentStartup: ["$PatentStartup"],
-        FFS: ["$FFS"],
+      
       },
     },
   ];
@@ -2183,7 +2146,6 @@ router.post(
         count.DpiitCertified = fillUndefined(val.statistics.dpiitCertified);
         count.ShowcasedStartups = fillUndefined(val.statistics.showcased);
         count.SeedFunded = fillUndefined(val.statistics.seedFunded);
-        count.FFS = fillUndefined(val.statistics.fundOfFunds);
         count.Patented = fillUndefined(val.statistics.patented);
         count.WomenLed = fillUndefined(val.statistics.womenOwned);
         count.LeadingSector = fillUndefined(val.statistics.leadingSector);
@@ -2244,7 +2206,6 @@ router.post(
         count.DpiitCertified = fillUndefined(val.statistics.dpiitCertified);
         count.ShowcasedStartups = fillUndefined(val.statistics.showcased);
         count.SeedFunded = fillUndefined(val.statistics.seedFunded);
-        count.FFS = fillUndefined(val.statistics.fundOfFunds);
         count.Patented = fillUndefined(val.statistics.patented);
         count.WomenLed = fillUndefined(val.statistics.womenOwned);
         count.LeadingSector = fillUndefined(val.statistics.leadingSector);
@@ -2489,8 +2450,6 @@ async function populateStats2Country(from, to, body) {
     "dpiitCertified",
     "showcased",
     "seedFunded",
-    "fundOfFunds",
-    "seedFunded",
     "patented",
     "womenOwned",
     "leadingSector",
@@ -2666,8 +2625,6 @@ async function populateStats2State(stateId, from, to, body) {
   const facetArr = [
     "dpiitCertified",
     "showcased",
-    "seedFunded",
-    "fundOfFunds",
     "seedFunded",
     "patented",
     "womenOwned",

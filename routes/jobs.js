@@ -42,7 +42,6 @@ var stateCountJson = {
   DpiitCertified: 0,
   TaxExempted: 0,
   WomenLed: 0,
-  FFS: 0,
   PatentStartup: 0,
   SeedFundStartup: 0,
   ShowcasedStartups: 0,
@@ -500,7 +499,6 @@ async function prepareIndiaLevelCountsV2() {
   template.DpiitCertified = fillUndefined(facetResult.DpiitCertified);
   template.TaxExempted = fillUndefined(facetResult.TaxExempted);
   template.WomenLed = fillUndefined(facetResult.WomenOwned);
-  template.FFS = fillUndefined(facetResult.FFS);
   template.PatentStartup = fillUndefined(facetResult.PatentStartup);
   template.SeedFundStartup = fillUndefined(facetResult.SeedFunded);
   template.ShowcasedStartups = fillUndefined(facetResult.ShowcasedStartups);
@@ -764,7 +762,6 @@ async function prepareStateWiseCountsV2() {
     template.DpiitCertified = fillUndefined(facetResult.DpiitCertified);
     template.TaxExempted = fillUndefined(facetResult.TaxExempted);
     template.WomenLed = fillUndefined(facetResult.WomenOwned);
-    template.FFS = fillUndefined(facetResult.FFS);
     template.PatentStartup = fillUndefined(facetResult.PatentStartup);
     template.SeedFundStartup = fillUndefined(facetResult.SeedFunded);
     template.ShowcasedStartups = fillUndefined(facetResult.ShowcasedStartups);
@@ -933,10 +930,6 @@ async function populateMultiFieldCountsForStateWithoutDate(stateId) {
           { "$match": { "dpiitCertified": { "$eq": true }, "stateId": { "$eq": stateId }, } },
           { "$count": "DpiitCertified" }
         ],
-        "FFS": [
-          { "$match": { "fundOfFunds": { "$eq": true }, "stateId": { "$eq": stateId }, } },
-          { "$count": "FFS" }
-        ],
         "ShowcasedStartups": [
           { "$match": { "showcased": { "$eq": true }, "stateId": { "$eq": stateId }, } },
           { "$count": "ShowcasedStartups" }
@@ -965,7 +958,6 @@ async function populateMultiFieldCountsForStateWithoutDate(stateId) {
         "DpiitCertified": { "$arrayElemAt": ["$DpiitCertified.DpiitCertified", 0] },
         "ShowcasedStartups": { "$arrayElemAt": ["$ShowcasedStartups.ShowcasedStartups", 0] },
         "PatentStartup": { "$arrayElemAt": ["$PatentStartup.PatentStartup", 0] },
-        "FFS": { "$arrayElemAt": ["$FFS.FFS", 0] }
       }
     }
   ];
@@ -1054,10 +1046,6 @@ async function populateMultiFieldCountsForIndiaWithoutDate() {
           { "$match": { "dpiitCertified": { "$eq": true }, } },
           { "$count": "DpiitCertified" }
         ],
-        "FFS": [
-          { "$match": { "fundOfFunds": { "$eq": true }, } },
-          { "$count": "FFS" }
-        ],
         "ShowcasedStartups": [
           { "$match": { "showcased": { "$eq": true }, } },
           { "$count": "ShowcasedStartups" }
@@ -1086,7 +1074,7 @@ async function populateMultiFieldCountsForIndiaWithoutDate() {
         "DpiitCertified": { "$arrayElemAt": ["$DpiitCertified.DpiitCertified", 0] },
         "ShowcasedStartups": { "$arrayElemAt": ["$ShowcasedStartups.ShowcasedStartups", 0] },
         "PatentStartup": { "$arrayElemAt": ["$PatentStartup.PatentStartup", 0] },
-        "FFS": { "$arrayElemAt": ["$FFS.FFS", 0] }
+        
       }
     }
   ];

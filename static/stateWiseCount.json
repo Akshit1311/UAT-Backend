@@ -18,7 +18,6 @@
             "DpiitCertified": 1,
             "TaxExempted": 0,
             "WomenLed": 1,
-            "FFS": 0,
             "PatentStartup": 0,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -244,7 +243,6 @@
             "DpiitCertified": 0,
             "TaxExempted": 0,
             "WomenLed": 0,
-            "FFS": 0,
             "PatentStartup": 0,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -308,7 +306,6 @@
             "DpiitCertified": 1,
             "TaxExempted": 0,
             "WomenLed": 0,
-            "FFS": 0,
             "PatentStartup": 0,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -412,7 +409,6 @@
             "DpiitCertified": 2,
             "TaxExempted": 0,
             "WomenLed": 1,
-            "FFS": 0,
             "PatentStartup": 0,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -546,7 +542,6 @@
             "DpiitCertified": 9,
             "TaxExempted": 0,
             "WomenLed": 1,
-            "FFS": 0,
             "PatentStartup": 0,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -735,7 +730,6 @@
             "DpiitCertified": 8,
             "TaxExempted": 1,
             "WomenLed": 5,
-            "FFS": 0,
             "PatentStartup": 0,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -1384,7 +1378,6 @@
             "DpiitCertified": 265,
             "TaxExempted": 12,
             "WomenLed": 90,
-            "FFS": 0,
             "PatentStartup": 12,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -2773,7 +2766,6 @@
             "DpiitCertified": 1,
             "TaxExempted": 0,
             "WomenLed": 1,
-            "FFS": 0,
             "PatentStartup": 0,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -2862,7 +2854,6 @@
             "DpiitCertified": 29,
             "TaxExempted": 0,
             "WomenLed": 13,
-            "FFS": 0,
             "PatentStartup": 0,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -3441,7 +3432,7 @@
             "DpiitCertified": 1,
             "TaxExempted": 0,
             "WomenLed": 0,
-            "FFS": 0,
+             
             "PatentStartup": 0,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -3490,7 +3481,7 @@
             "DpiitCertified": 8,
             "TaxExempted": 0,
             "WomenLed": 5,
-            "FFS": 0,
+             
             "PatentStartup": 0,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -3909,7 +3900,7 @@
             "DpiitCertified": 6,
             "TaxExempted": 0,
             "WomenLed": 2,
-            "FFS": 0,
+             
             "PatentStartup": 0,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -4278,7 +4269,7 @@
             "DpiitCertified": 1,
             "TaxExempted": 0,
             "WomenLed": 0,
-            "FFS": 0,
+             
             "PatentStartup": 0,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -4327,7 +4318,7 @@
             "DpiitCertified": 16,
             "TaxExempted": 0,
             "WomenLed": 9,
-            "FFS": 0,
+             
             "PatentStartup": 1,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -5021,7 +5012,7 @@
             "DpiitCertified": 16,
             "TaxExempted": 0,
             "WomenLed": 9,
-            "FFS": 0,
+             
             "PatentStartup": 0,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -5555,7 +5546,7 @@
             "DpiitCertified": 1,
             "TaxExempted": 0,
             "WomenLed": 0,
-            "FFS": 0,
+             
             "PatentStartup": 0,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -5614,7 +5605,7 @@
             "DpiitCertified": 25,
             "TaxExempted": 0,
             "WomenLed": 13,
-            "FFS": 0,
+             
             "PatentStartup": 3,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -6518,7 +6509,7 @@
             "DpiitCertified": 98,
             "TaxExempted": 2,
             "WomenLed": 35,
-            "FFS": 0,
+             
             "PatentStartup": 6,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -7592,7 +7583,7 @@
             "DpiitCertified": 355,
             "TaxExempted": 9,
             "WomenLed": 138,
-            "FFS": 0,
+             
             "PatentStartup": 20,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -9031,7 +9022,7 @@
             "DpiitCertified": 108,
             "TaxExempted": 4,
             "WomenLed": 34,
-            "FFS": 0,
+             
             "PatentStartup": 6,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -10015,7 +10006,7 @@
             "DpiitCertified": 54,
             "TaxExempted": 1,
             "WomenLed": 21,
-            "FFS": 0,
+             
             "PatentStartup": 4,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -10624,7 +10615,7 @@
             "DpiitCertified": 67,
             "TaxExempted": 2,
             "WomenLed": 29,
-            "FFS": 0,
+             
             "PatentStartup": 4,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -11688,7 +11679,7 @@
             "DpiitCertified": 13,
             "TaxExempted": 0,
             "WomenLed": 2,
-            "FFS": 0,
+             
             "PatentStartup": 0,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -11917,7 +11908,7 @@
             "DpiitCertified": 2,
             "TaxExempted": 0,
             "WomenLed": 1,
-            "FFS": 0,
+             
             "PatentStartup": 0,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -11991,7 +11982,7 @@
             "DpiitCertified": 3,
             "TaxExempted": 0,
             "WomenLed": 0,
-            "FFS": 0,
+             
             "PatentStartup": 0,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -12055,7 +12046,7 @@
             "DpiitCertified": 122,
             "TaxExempted": 4,
             "WomenLed": 50,
-            "FFS": 0,
+             
             "PatentStartup": 7,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -13344,7 +13335,7 @@
             "DpiitCertified": 134,
             "TaxExempted": 4,
             "WomenLed": 52,
-            "FFS": 0,
+             
             "PatentStartup": 12,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -14508,7 +14499,7 @@
             "DpiitCertified": 13,
             "TaxExempted": 0,
             "WomenLed": 2,
-            "FFS": 0,
+             
             "PatentStartup": 0,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -14797,7 +14788,7 @@
             "DpiitCertified": 18,
             "TaxExempted": 0,
             "WomenLed": 6,
-            "FFS": 0,
+             
             "PatentStartup": 1,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -15181,7 +15172,7 @@
             "DpiitCertified": 41,
             "TaxExempted": 0,
             "WomenLed": 15,
-            "FFS": 0,
+             
             "PatentStartup": 2,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -15900,7 +15891,7 @@
             "DpiitCertified": 51,
             "TaxExempted": 0,
             "WomenLed": 11,
-            "FFS": 0,
+             
             "PatentStartup": 1,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -16729,7 +16720,7 @@
             "DpiitCertified": 196,
             "TaxExempted": 3,
             "WomenLed": 78,
-            "FFS": 0,
+             
             "PatentStartup": 7,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -18003,7 +17994,7 @@
             "DpiitCertified": 14,
             "TaxExempted": 0,
             "WomenLed": 6,
-            "FFS": 0,
+             
             "PatentStartup": 2,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -18632,7 +18623,7 @@
             "DpiitCertified": 383,
             "TaxExempted": 18,
             "WomenLed": 135,
-            "FFS": 0,
+             
             "PatentStartup": 20,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -20046,7 +20037,7 @@
             "DpiitCertified": 52,
             "TaxExempted": 2,
             "WomenLed": 14,
-            "FFS": 0,
+             
             "PatentStartup": 5,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
@@ -20640,7 +20631,7 @@
             "DpiitCertified": 80,
             "TaxExempted": 3,
             "WomenLed": 23,
-            "FFS": 0,
+             
             "PatentStartup": 3,
             "SeedFundStartup": 0,
             "ShowcasedStartups": 0
