@@ -209,7 +209,13 @@ router.post("/filter", (req, resp) => {
   query.badges = req.body.badges;
   query.roles = req.body.roles;
   query.page = req.body.page;
-  const otherRoles = ["Incubator", "Accelerator", "Mentor"];
+  const otherRoles = [
+    "Mentor",
+    "Incubator",
+    "Investor",
+    "Accelerator",
+    "Institution",
+  ];
   // console.log(JSON.stringify(query.roles));
   if (otherRoles.includes(query.roles[0])) {
     query.dpiitRecogniseUser = false;
