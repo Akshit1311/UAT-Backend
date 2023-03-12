@@ -302,6 +302,7 @@ router.post("/leadingSector", async (req, resp) => {
   let output = sectorwiseCounts.filter(
     (e) => e._id.name && e._id.name.trim() && e._id.name != "Others"
   );
+  console.log(JSON.stringify(output));
   resp.send(output[0]);
 });
 
