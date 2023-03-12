@@ -25,16 +25,16 @@ router.get("/industryInsights", async (req, resp) => {
 router.get("/sectorInsights", async (req, resp) => {
   let stateId = "";
   if (!_.isEmpty(req.query.stateId)) {
-    stateId = req.query.stateId;
+    stateId = ObjectId(req.query.stateId);
   }
-  let totalSectorCount = await getTotalSectorCount(stateId);
+  // let totalSectorCount = await getTotalSectorCount(stateId);
   let sectorWiseCounts = await getSectorWiseCounts(stateId);
   let output = [];
   sectorWiseCounts.forEach((e) => {
-    let percentage = totalSectorCount
-      ? ((e.count * 100) / totalSectorCount).toFixed(2)
-      : 0;
-    output.push({ sector: e._id, count: e.count, percentage: percentage });
+    // let percentage = totalSectorCount
+    //   ? ((e.count * 100) / totalSectorCount).toFixed(2)
+    //   : 0;
+    output.push({ sector: e._id, count: e.count, percentage: 0 });
   });
   resp.send(output);
 });
@@ -44,18 +44,18 @@ router.get("/stageInsights", async (req, resp) => {
   //This Api returns insights i.e. sector wise counts and their percentages
   let stateId = "";
   if (!_.isEmpty(req.query.stateId)) {
-    stateId = req.query.stateId;
+    stateId = ObjectId(req.query.stateId);
   }
 
-  let totalStageCount = await getTotalStageCount(stateId);
+  // let totalStageCount = await getTotalStageCount(stateId);
   let stageWiseCounts = await getStageWiseCounts(stateId);
 
   let output = [];
   stageWiseCounts.forEach((e) => {
-    let percentage = totalStageCount
-      ? ((e.count * 100) / totalStageCount).toFixed(2)
-      : 0;
-    output.push({ stage: e._id, count: e.count, percentage: percentage });
+    // let percentage = totalStageCount
+    //   ? ((e.count * 100) / totalStageCount).toFixed(2)
+    //   : 0;
+    output.push({ stage: e._id, count: e.count, percentage: 0 });
   });
   resp.send(output);
 });
@@ -207,7 +207,10 @@ async function getIndustryWiseCounts(stateId = "") {
 
 async function getSectorWiseCounts(stateId = "") {
   let matchQuery = {
-    $and: [{ role: "Startup" }, { "sector.name": { $ne: "" } }],
+    $and: [
+      { role: "Startup" },
+      { "sector.name": { $exists: true, $ne: null } },
+    ],
   };
   if (stateId != "") {
     matchQuery = {
