@@ -94,7 +94,6 @@ router.post("/topNumbers", async (req, resp) => {
 
   query.push({ $facet: facetQuery });
   query.push({ $project: projectQuery });
-  console.log(JSON.stringify(query));
   return executeQuery(resp, query);
 });
 router.get("/startupCounts", async (req, resp) => {
@@ -248,8 +247,6 @@ router.post("/startupCounts/:startupType", async (req, resp) => {
   }
   query.push({ $facet: facetQuery });
   query.push({ $project: projectQuery });
-  console.log(JSON.stringify(query));
-
   return executeQuery(resp, query);
 });
 
@@ -298,11 +295,9 @@ router.post("/leadingSector", async (req, resp) => {
     .filter((key) => acceptedParams.includes(key))
     .map((key) => obj[key]);
   let sectorwiseCounts = await getSectorCounts(matchQueryArr);
-  console.log(JSON.stringify(sectorwiseCounts));
   let output = sectorwiseCounts.filter(
     (e) => e._id.name && e._id.name.trim() && e._id.name != "Others"
   );
-  console.log(JSON.stringify(output));
   resp.send(output[0]);
 });
 
@@ -318,7 +313,6 @@ async function getSectorCounts(matchQuery = "") {
     },
     { $sort: { count: -1 } },
   ];
-  console.log(JSON.stringify(querySectorwiseCount));
   var prom = new Promise((resolve, rej) => {
     try {
       mongodb
@@ -432,7 +426,7 @@ async function executeQuery(resp, query) {
   });
   return Promise.all([promAll])
     .then((values) => {
-      console.log("All promises resolved - " + JSON.stringify(values));
+      // console.log("All promises resolved - " + JSON.stringify(values));
       return values[0];
     })
     .catch((reason) => {
