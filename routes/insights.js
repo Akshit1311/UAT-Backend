@@ -133,11 +133,12 @@ async function getTotalSectorCount(stateId = "") {
 }
 
 async function getTotalStageCount(stateId = "") {
-  console.log(`state=${stateId}`);
-  let matchQuery = { stage: { $ne: "" } };
   if (stateId != "") {
-    matchQuery = { stateId: { $eq: stateId }, stage: { $ne: "" } };
+    matchQuery = { stateId: stateId, role: "Startup", stage: { $ne: null } };
+  } else {
+    matchQuery = { role: "Startup", stage: { $ne: null } };
   }
+
   const queryTotalStageCount = [
     { $match: matchQuery },
     { $group: { _id: null, count: { $sum: 1 } } },
