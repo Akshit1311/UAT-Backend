@@ -2,198 +2,197 @@ const express = require("express");
 const router = express.Router();
 const request = require("request");
 const mongodb = require("../mongodb");
-const _ = require('lodash');
+const _ = require("lodash");
 
 router.get("/industryInsights", async (req, resp) => {
   //This Api returns insights i.e. industry wise counts and their percentages
-  let stateId='';
+  let stateId = "";
   if (!_.isEmpty(req.query.stateId)) {
-    stateId=ObjectId(req.query.stateId);
+    stateId = ObjectId(req.query.stateId);
   }
   // let totalCount = await getTotalCount(stateId);
   let industryWiseCounts = await getIndustryWiseCounts(stateId);
- 
-  let output=[];
-  industryWiseCounts.forEach(e => {
-      // let percentage = (totalCount)? (e.count*100/totalCount).toFixed(2):0;
-      output.push({"industry":e._id, "count": e.count, "percentage":0});
+
+  let output = [];
+  industryWiseCounts.forEach((e) => {
+    // let percentage = (totalCount)? (e.count*100/totalCount).toFixed(2):0;
+    output.push({ industry: e._id, count: e.count, percentage: 0 });
   });
-  resp.send((output));
+  resp.send(output);
 });
 
 //Get Sector insights
 router.get("/sectorInsights", async (req, resp) => {
-  let stateId='';
+  let stateId = "";
   if (!_.isEmpty(req.query.stateId)) {
-    stateId=req.query.stateId;
+    stateId = req.query.stateId;
   }
   let totalSectorCount = await getTotalSectorCount(stateId);
   let sectorWiseCounts = await getSectorWiseCounts(stateId);
-  let output=[];
-  sectorWiseCounts.forEach(e => {
-      let percentage = (totalSectorCount)? (e.count*100/totalSectorCount).toFixed(2):0;
-      output.push({"sector":e._id, "count": e.count, "percentage":percentage});
+  let output = [];
+  sectorWiseCounts.forEach((e) => {
+    let percentage = totalSectorCount
+      ? ((e.count * 100) / totalSectorCount).toFixed(2)
+      : 0;
+    output.push({ sector: e._id, count: e.count, percentage: percentage });
   });
-  resp.send((output));
+  resp.send(output);
 });
 
 //Get Stage insights
 router.get("/stageInsights", async (req, resp) => {
   //This Api returns insights i.e. sector wise counts and their percentages
-  let stateId='';
+  let stateId = "";
   if (!_.isEmpty(req.query.stateId)) {
-    stateId=req.query.stateId;
+    stateId = req.query.stateId;
   }
 
   let totalStageCount = await getTotalStageCount(stateId);
   let stageWiseCounts = await getStageWiseCounts(stateId);
 
-  let output=[];
-  stageWiseCounts.forEach(e => {
-      let percentage = (totalStageCount)? (e.count*100/totalStageCount).toFixed(2):0;
-      output.push({"stage":e._id, "count": e.count, "percentage":percentage});
+  let output = [];
+  stageWiseCounts.forEach((e) => {
+    let percentage = totalStageCount
+      ? ((e.count * 100) / totalStageCount).toFixed(2)
+      : 0;
+    output.push({ stage: e._id, count: e.count, percentage: percentage });
   });
-  resp.send((output));
+  resp.send(output);
 });
-  
-  
 
-async function getTotalCount(stateId='') {
-  let matchQuery = { "industry.name": { "$ne": "" }, }
-  if (stateId!=''){
-    matchQuery={  "stateId": { "$eq": stateId }, "industry.name": { "$ne": "" }, }
+async function getTotalCount(stateId = "") {
+  let matchQuery = { "industry.name": { $ne: "" } };
+  if (stateId != "") {
+    matchQuery = { stateId: { $eq: stateId }, "industry.name": { $ne: "" } };
   }
   const queryTotalIndCount = [
-    { $unwind:  { path: "$industry" } },
-     { "$match": matchQuery },
-    { $group:   { _id: null,  count: { $sum:1 } } }
-  ] ;
-
-  var prom = new Promise((resolve, rej) => {
-    try {
-      mongodb
-        .getDb()
-        .collection("digitalMapUser")
-        .aggregate(queryTotalIndCount).toArray(async (err, result) => {
-          if (err) throw err;
-          let output = await result[0];
-          resolve(output);
-        });
-    } catch (err) {
-      console.error('toNumbers :: ' + err.message);
-    }    
-  });
-  return Promise.all([prom])
-    .then((values) => {
-      console.log("All promises resolved - " + JSON.stringify(values));
-      return values[0].count;
-    })
-    .catch((reason) => {
-      console.log(reason);
-    });
-
-};
-
-async function getTotalSectorCount(stateId='') {
-
-  let matchQuery = { "sector.name": { "$ne": "" }, }
-  if (stateId!=''){
-    matchQuery={  "stateId": { "$eq": stateId },  "sector.name": { "$ne": "" }, }
-  }
-  const queryTotalSectorCount = [
-    { $unwind:  { path: "$sector" } },
-     { "$match": matchQuery },
-    { $group:   { _id: null,  count: { $sum:1 } } }
-  ] ;
-
-  var prom = new Promise((resolve, rej) => {
-    try {
-      mongodb
-        .getDb()
-        .collection("digitalMapUser")
-        .aggregate(queryTotalSectorCount).toArray(async (err, result) => {
-          if (err) throw err;
-          let output = await result[0];
-          resolve(output);
-        });
-    } catch (err) {
-      console.error('toNumbers :: ' + err.message);
-    }    
-  });
-  return Promise.all([prom])
-    .then((values) => {
-      console.log("All promises resolved - " + JSON.stringify(values));
-      return values[0].count;
-    })
-    .catch((reason) => {
-      console.log(reason);
-    });
-
-};
-
-async function getTotalStageCount(stateId='') {
-   console.log(`state=${stateId}`);
-  let matchQuery = { "stage": { "$ne": "" }, }
-  if (stateId!=''){
-    matchQuery={  "stateId": { "$eq": stateId },  "stage": { "$ne": "" }, }
-  }
-  const queryTotalStageCount = [
-     { "$match": matchQuery },
-    { $group:   { _id: null,  count: { $sum:1 } } }
-  ] ;
-
-  var prom = new Promise((resolve, rej) => {
-    try {
-      mongodb
-        .getDb()
-        .collection("digitalMapUser")
-        .aggregate(queryTotalStageCount).toArray(async (err, result) => {
-          if (err) throw err;
-          let output = await result[0];
-          resolve(output);
-        });
-    } catch (err) {
-      console.error('toNumbers :: ' + err.message);
-    }    
-  });
-  return Promise.all([prom])
-    .then((values) => {
-      console.log("All promises resolved - " + JSON.stringify(values));
-      return values[0].count;
-    })
-    .catch((reason) => {
-      console.log(reason);
-    });
-
-};
-
-
-
-async function getIndustryWiseCounts(stateId='') {
-  let matchQuery ={ "industry.name": { "$ne": "" }, } 
-  if (stateId!=''){
-    matchQuery={  "stateId": { "$eq": stateId },  "industry.name": { "$ne": "" }, }
-  }
-  const queryIndwiseCount = [
-    { $unwind:  { path: "$industry" } },
-     { "$match": matchQuery },
-    { $group:   {  _id: "$industry.name", count: { $sum:1 } } },
-    { $sort:    { "_id":1 } }
+    { $unwind: { path: "$industry" } },
+    { $match: matchQuery },
+    { $group: { _id: null, count: { $sum: 1 } } },
   ];
 
+  var prom = new Promise((resolve, rej) => {
+    try {
+      mongodb
+        .getDb()
+        .collection("digitalMapUser")
+        .aggregate(queryTotalIndCount)
+        .toArray(async (err, result) => {
+          if (err) throw err;
+          let output = await result[0];
+          resolve(output);
+        });
+    } catch (err) {
+      console.error("toNumbers :: " + err.message);
+    }
+  });
+  return Promise.all([prom])
+    .then((values) => {
+      console.log("All promises resolved - " + JSON.stringify(values));
+      return values[0].count;
+    })
+    .catch((reason) => {
+      console.log(reason);
+    });
+}
+
+async function getTotalSectorCount(stateId = "") {
+  let matchQuery = { "sector.name": { $ne: "" } };
+  if (stateId != "") {
+    matchQuery = { stateId: { $eq: stateId }, "sector.name": { $ne: "" } };
+  }
+  const queryTotalSectorCount = [
+    { $unwind: { path: "$sector" } },
+    { $match: matchQuery },
+    { $group: { _id: null, count: { $sum: 1 } } },
+  ];
 
   var prom = new Promise((resolve, rej) => {
     try {
       mongodb
         .getDb()
         .collection("digitalMapUser")
-        .aggregate(queryIndwiseCount).toArray(async (err, result) => {
+        .aggregate(queryTotalSectorCount)
+        .toArray(async (err, result) => {
+          if (err) throw err;
+          let output = await result[0];
+          resolve(output);
+        });
+    } catch (err) {
+      console.error("toNumbers :: " + err.message);
+    }
+  });
+  return Promise.all([prom])
+    .then((values) => {
+      console.log("All promises resolved - " + JSON.stringify(values));
+      return values[0].count;
+    })
+    .catch((reason) => {
+      console.log(reason);
+    });
+}
+
+async function getTotalStageCount(stateId = "") {
+  console.log(`state=${stateId}`);
+  let matchQuery = { stage: { $ne: "" } };
+  if (stateId != "") {
+    matchQuery = { stateId: { $eq: stateId }, stage: { $ne: "" } };
+  }
+  const queryTotalStageCount = [
+    { $match: matchQuery },
+    { $group: { _id: null, count: { $sum: 1 } } },
+  ];
+
+  var prom = new Promise((resolve, rej) => {
+    try {
+      mongodb
+        .getDb()
+        .collection("digitalMapUser")
+        .aggregate(queryTotalStageCount)
+        .toArray(async (err, result) => {
+          if (err) throw err;
+          let output = await result[0];
+          resolve(output);
+        });
+    } catch (err) {
+      console.error("toNumbers :: " + err.message);
+    }
+  });
+  return Promise.all([prom])
+    .then((values) => {
+      console.log("All promises resolved - " + JSON.stringify(values));
+      return values[0].count;
+    })
+    .catch((reason) => {
+      console.log(reason);
+    });
+}
+
+async function getIndustryWiseCounts(stateId = "") {
+  let matchQuery = { "industry.name": { $exists: true, $ne: null } };
+  if (stateId != "") {
+    matchQuery = { stateId: { $eq: stateId }, "industry.name": { $ne: "" } };
+  }
+  const queryIndwiseCount = [
+    { $unwind: { path: "$industry" } },
+    { $match: matchQuery },
+    { $group: { _id: "$industry.name", count: { $sum: 1 } } },
+    { $sort: { _id: 1 } },
+  ];
+
+  var prom = new Promise((resolve, rej) => {
+    try {
+      mongodb
+        .getDb()
+        .collection("digitalMapUser")
+        .aggregate(queryIndwiseCount)
+        .toArray(async (err, result) => {
           if (err) throw err;
           let output = await result;
           resolve(output);
         });
     } catch (err) {
-      console.error('toNumbers :: ' + err.message);
+      console.error("toNumbers :: " + err.message);
     }
   });
   return Promise.all([prom])
@@ -204,36 +203,41 @@ async function getIndustryWiseCounts(stateId='') {
     .catch((reason) => {
       console.log(reason);
     });
-
 }
 
-
-async function getSectorWiseCounts(stateId='') {
-
-  let matchQuery ={$and:[{"role":'Startup'},{ "sector.name": { "$ne": "" }, }] }
-  if (stateId!=''){
-    matchQuery={ $and:[{"stateId": { "$eq": stateId }},{"role":'Startup'},{ "sector.name": { "$ne": "" }},]  }
+async function getSectorWiseCounts(stateId = "") {
+  let matchQuery = {
+    $and: [{ role: "Startup" }, { "sector.name": { $ne: "" } }],
+  };
+  if (stateId != "") {
+    matchQuery = {
+      $and: [
+        { stateId: { $eq: stateId } },
+        { role: "Startup" },
+        { "sector.name": { $ne: "" } },
+      ],
+    };
   }
   const querySectorwiseCount = [
-    { $unwind:  { path: "$sector" } },
-    { "$match": matchQuery },
-    { $group:   {  _id: "$sector.name", count: { $sum:1 } } },
+    { $unwind: { path: "$sector" } },
+    { $match: matchQuery },
+    { $group: { _id: "$sector.name", count: { $sum: 1 } } },
     // { $sort:    { "_id":1 } }
   ];
 
-
   var prom = new Promise((resolve, rej) => {
     try {
       mongodb
         .getDb()
         .collection("digitalMapUser")
-        .aggregate(querySectorwiseCount).toArray(async (err, result) => {
+        .aggregate(querySectorwiseCount)
+        .toArray(async (err, result) => {
           if (err) throw err;
           let output = await result;
           resolve(output);
         });
     } catch (err) {
-      console.error('toNumbers :: ' + err.message);
+      console.error("toNumbers :: " + err.message);
     }
   });
   return Promise.all([prom])
@@ -244,35 +248,38 @@ async function getSectorWiseCounts(stateId='') {
     .catch((reason) => {
       console.log(reason);
     });
-
 }
 
-async function getStageWiseCounts(stateId='') {
-
-  
-  let matchQuery ={$and:[{"role":'Startup'},{ "stage": { "$ne": "" }, }] }
-  if (stateId!=''){
-    matchQuery={ $and:[{"stateId": { "$eq": stateId }},{"role":'Startup'},{ "stage": { "$ne": "" }},]  }
+async function getStageWiseCounts(stateId = "") {
+  let matchQuery = { $and: [{ role: "Startup" }, { stage: { $ne: "" } }] };
+  if (stateId != "") {
+    matchQuery = {
+      $and: [
+        { stateId: { $eq: stateId } },
+        { role: "Startup" },
+        { stage: { $ne: "" } },
+      ],
+    };
   }
   const queryStagewiseCount = [
-    { "$match": matchQuery },
-    { $group:   {  _id: "$stage", count: { $sum:1 } } },
-    { $sort:    { "_id":1 } }
+    { $match: matchQuery },
+    { $group: { _id: "$stage", count: { $sum: 1 } } },
+    { $sort: { _id: 1 } },
   ];
-
 
   var prom = new Promise((resolve, rej) => {
     try {
       mongodb
         .getDb()
         .collection("digitalMapUser")
-        .aggregate(queryStagewiseCount).toArray(async (err, result) => {
+        .aggregate(queryStagewiseCount)
+        .toArray(async (err, result) => {
           if (err) throw err;
           let output = await result;
           resolve(output);
         });
     } catch (err) {
-      console.error('toNumbers :: ' + err.message);
+      console.error("toNumbers :: " + err.message);
     }
   });
   return Promise.all([prom])
@@ -283,7 +290,6 @@ async function getStageWiseCounts(stateId='') {
     .catch((reason) => {
       console.log(reason);
     });
-
 }
 
 router.get("/:geographicalEntity/:entityId/:from/:to", (req, resp) => {
