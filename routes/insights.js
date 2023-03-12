@@ -16,7 +16,7 @@ router.get("/industryInsights", async (req, resp) => {
   let output = [];
   industryWiseCounts.forEach((e) => {
     // let percentage = (totalCount)? (e.count*100/totalCount).toFixed(2):0;
-    if (e._id != "") {
+    if (e._id !== null && e._id != "") {
       output.push({ industry: e._id, count: e.count, percentage: 0 });
     }
   });
@@ -36,7 +36,7 @@ router.get("/sectorInsights", async (req, resp) => {
     // let percentage = totalSectorCount
     //   ? ((e.count * 100) / totalSectorCount).toFixed(2)
     //   : 0;
-    if (e._id != "") {
+    if (e._id !== null && e._id != "") {
       output.push({ sector: e._id, count: e.count, percentage: 0 });
     }
   });
@@ -59,7 +59,9 @@ router.get("/stageInsights", async (req, resp) => {
     // let percentage = totalStageCount
     //   ? ((e.count * 100) / totalStageCount).toFixed(2)
     //   : 0;
-    output.push({ stage: e._id, count: e.count, percentage: 0 });
+    if (e._id !== null && e._id != "") {
+      output.push({ stage: e._id, count: e.count, percentage: 0 });
+    }
   });
   resp.send(output);
 });
@@ -177,7 +179,7 @@ async function getIndustryWiseCounts(stateId = "") {
   let matchQuery = { "industry.name": { $exists: true } };
   if (stateId != "") {
     matchQuery = {
-      stateId:  stateId ,
+      stateId: stateId,
       "industry.name": { $exists: true },
     };
   }
