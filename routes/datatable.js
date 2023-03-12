@@ -508,7 +508,7 @@ router.post(
         to,
         req.body
       );
-      resp.send(JSON.stringify(stateCounts));
+      console.log(JSON.stringify(stateCounts));
       let map = new Map();
       // items = districts
       let items = Object.keys(stateCounts);
