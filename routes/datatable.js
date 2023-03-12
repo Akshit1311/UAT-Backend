@@ -519,7 +519,12 @@ router.post(
           let x = v[j];
           let c = x.count;
           x = x._id;
-          dId = x.districtId.toString();
+          let dId ='';
+          if (x.districtId == null) {
+            continue;
+          } else {
+            dId = x.districtId.toString();
+          };
 
           if (map.has(dId)) {
             let countData = map.get(dId);
@@ -531,7 +536,7 @@ router.post(
             let data = {};
             data.districtId = dId;
             data.district = x.district;
-            data.stateId = x.stateId;
+            data.stateId = x.stateId.toString();
             data.state = x.state;
             data.statistics = placeholder;
             map.set(dId, data);
