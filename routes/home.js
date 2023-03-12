@@ -25,7 +25,7 @@ const startupTypes = [
   "seedFunded",
   "patented",
   "womenOwned",
-  "leadingSector",
+  " Sector",
 ];
 
 //Get top numbers POST API
@@ -253,7 +253,7 @@ router.post("/startupCounts/:startupType", async (req, resp) => {
   return executeQuery(resp, query);
 });
 
-router.post("/leadingSector", async (req, resp) => {
+router.post("/ Sector", async (req, resp) => {
   //Array to accept variable parameters e.g. stateId, industries, sectors, from and to dates
   const acceptedParams = ["country", "role"];
   const states = [];
@@ -317,7 +317,7 @@ async function getSectorCounts(matchQuery = "") {
     },
     { $sort: { count: -1 } },
   ];
-
+  console.log(JSON.stringify(querySectorwiseCount));
   var prom = new Promise((resolve, rej) => {
     try {
       mongodb
