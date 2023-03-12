@@ -519,7 +519,7 @@ router.post(
           let x = v[j];
           let c = x.count;
           x = x._id;
-          dId = x.districtId;
+          dId = x.districtId.toString();
 
           if (map.has(dId)) {
             let countData = map.get(dId);
