@@ -634,7 +634,7 @@ router.get("/v2/statistics/allDistricts/:from/:to", async (req, resp) => {
         let data = {};
         data.districtId = dId;
         data.district = x.district;
-        data.stateId = x.stateId.toString();
+        data.stateId = x.stateId;
         data.state = x.state;
         data.statistics = placeholder;
         map.set(dId, data);
