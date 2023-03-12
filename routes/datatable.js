@@ -508,7 +508,7 @@ router.post(
         to,
         req.body
       );
-      console.log(JSON.stringify(stateCounts));
+      // resp.send(JSON.stringify(stateCounts));
       let map = new Map();
       // items = districts
       let items = Object.keys(stateCounts);
@@ -519,28 +519,22 @@ router.post(
           let x = v[j];
           let c = x.count;
           x = x._id;
-          //If state id is null then ignore otherwise convert stateid to string
-          let districtId = "";
-          if (x.stateId == null) {
-            continue;
-          } else {
-            districtId = x.stateId.toString();
-          }
+          dId = x.districtId;
 
-          if (map.has(districtId)) {
-            let countData = map.get(districtId);
+          if (map.has(dId)) {
+            let countData = map.get(dId);
             countData.statistics[key] = c;
-            map.set(districtId, countData);
+            map.set(dId, countData);
           } else {
             let placeholder = JSON.parse(JSON.stringify(dataCountJson));
             placeholder[key] = c;
             let data = {};
-            data.districtId = districtId;
+            data.districtId = dId;
             data.district = x.district;
             data.stateId = x.stateId;
             data.state = x.state;
             data.statistics = placeholder;
-            map.set(districtId, data);
+            map.set(dId, data);
           }
         }
       }
@@ -575,6 +569,7 @@ router.post(
         countsArr.push(district);
       }
       output.data = countsArr;
+      console.log(JSON.stringify(output));
       resp.status(200).send(output);
     } else {
       // City/District level
