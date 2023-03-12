@@ -519,12 +519,12 @@ router.post(
           let x = v[j];
           let c = x.count;
           x = x._id;
-          let dId ='';
+          let dId = "";
           if (x.districtId == null) {
             continue;
           } else {
             dId = x.districtId.toString();
-          };
+          }
 
           if (map.has(dId)) {
             let countData = map.get(dId);
@@ -619,21 +619,25 @@ router.get("/v2/statistics/allDistricts/:from/:to", async (req, resp) => {
       let x = v[j];
       let c = x.count;
       x = x._id;
-
-      if (map.has(x.districtId)) {
-        let countData = map.get(x.districtId);
+      if (x.districtId == null) {
+        continue;
+      } else {
+        dId = x.districtId.toString();
+      }
+      if (map.has(dId)) {
+        let countData = map.get(dId);
         countData.statistics[key] = c;
-        map.set(x.districtId, countData);
+        map.set(dId, countData);
       } else {
         let placeholder = JSON.parse(JSON.stringify(dataCountJson));
         placeholder[key] = c;
         let data = {};
-        data.districtId = x.districtId;
+        data.districtId = dId;
         data.district = x.district;
-        data.stateId = x.stateId;
+        data.stateId = x.stateId.toString();
         data.state = x.state;
         data.statistics = placeholder;
-        map.set(x.districtId, data);
+        map.set(dId, data);
       }
 
       if (c > allIndiaDistrictStats.max[key]) {
@@ -1750,57 +1754,51 @@ async function populateMultiFieldCountsForCountry(from, to) {
   const profileRegisteredRange = { $lte: to, $gte: from };
   let query = [
     {
-      $match: { profileRegisteredOn: profileRegisteredRange },
+      $match: {
+        countryName: "India",
+        profileRegisteredOn: profileRegisteredRange,
+      },
     },
     {
       $facet: {
         Startup: [
-          { $match: { role: { $eq: "Startup" } } },
+          { $match: { role: "Startup", dpiitCertified: true } },
           { $group: groupQuery },
         ],
-        Investor: [
-          { $match: { role: { $eq: "Investor" } } },
-          { $group: groupQuery },
-        ],
+        Investor: [{ $match: { role: "Investor" } }, { $group: groupQuery }],
         Accelerator: [
-          { $match: { role: { $eq: "Accelerator" } } },
+          { $match: { role: "Accelerator" } },
           { $group: groupQuery },
         ],
         Individual: [
-          { $match: { role: { $eq: "Individual" } } },
+          { $match: { role: "Individual" } },
           { $group: groupQuery },
         ],
-        Mentor: [
-          { $match: { role: { $eq: "Mentor" } } },
-          { $group: groupQuery },
-        ],
+        Mentor: [{ $match: { role: "Mentor" } }, { $group: groupQuery }],
         GovernmentBody: [
-          { $match: { role: { $eq: "GovernmentBody" } } },
+          { $match: { role: "GovernmentBody" } },
           { $group: groupQuery },
         ],
-        Incubator: [
-          { $match: { role: { $eq: "Incubator" } } },
-          { $group: groupQuery },
-        ],
+        Incubator: [{ $match: { role: "Incubator" } }, { $group: groupQuery }],
         WomenOwned: [
-          { $match: { womenOwned: { $eq: true } } },
+          { $match: { womenOwned: true, dpiitCertified: true } },
           { $group: groupQuery },
         ],
         SeedFunded: [
-          { $match: { seedFunded: { $eq: true } } },
+          { $match: { seedFunded: true, dpiitCertified: true } },
           { $group: groupQuery },
         ],
         TaxExempted: [
-          { $match: { taxExempted: { $eq: true } } },
+          { $match: { taxExempted: true, dpiitCertified: true } },
           { $group: groupQuery },
         ],
         DpiitCertified: [
-          { $match: { dpiitCertified: { $eq: true } } },
+          { $match: { dpiitCertified: true } },
           { $group: groupQuery },
         ],
 
         ShowcasedStartups: [
-          { $match: { showcased: { $eq: true } } },
+          { $match: { showcased: true, dpiitCertified: true } },
           { $group: groupQuery },
         ],
         PatentStartup: [
