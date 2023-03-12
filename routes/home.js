@@ -253,7 +253,7 @@ router.post("/startupCounts/:startupType", async (req, resp) => {
   return executeQuery(resp, query);
 });
 
-router.post("/ Sector", async (req, resp) => {
+router.post("/leadingSector", async (req, resp) => {
   //Array to accept variable parameters e.g. stateId, industries, sectors, from and to dates
   const acceptedParams = ["country", "role"];
   const states = [];
