@@ -300,7 +300,7 @@ router.post("/leadingSector", async (req, resp) => {
   let sectorwiseCounts = await getSectorCounts(matchQueryArr);
   console.log(JSON.stringify(sectorwiseCounts));
   let output = sectorwiseCounts.filter(
-    (e) => e._id.name != "Others" && e._id.name != ""
+    (e) => e._id.name != "Others" && !e._id.name
   );
   resp.send(output[0]);
 });
