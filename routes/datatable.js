@@ -519,21 +519,28 @@ router.post(
           let x = v[j];
           let c = x.count;
           x = x._id;
+          //If state id is null then ignore otherwise convert stateid to string
+          let districtId = "";
+          if (x.stateId == null) {
+            continue;
+          } else {
+            districtId = x.stateId.toString();
+          }
 
-          if (map.has(x.districtId)) {
-            let countData = map.get(x.districtId);
+          if (map.has(districtId)) {
+            let countData = map.get(districtId);
             countData.statistics[key] = c;
-            map.set(x.districtId, countData);
+            map.set(districtId, countData);
           } else {
             let placeholder = JSON.parse(JSON.stringify(dataCountJson));
             placeholder[key] = c;
             let data = {};
-            data.districtId = x.districtId;
+            data.districtId = districtId;
             data.district = x.district;
             data.stateId = x.stateId;
             data.state = x.state;
             data.statistics = placeholder;
-            map.set(x.districtId, data);
+            map.set(districtId, data);
           }
         }
       }
@@ -1110,7 +1117,7 @@ async function populateMultiFieldCountsForState(stateId, from, to) {
           },
           { $count: "DpiitCertified" },
         ],
-        
+
         ShowcasedStartups: [
           {
             $match: {
@@ -1398,7 +1405,7 @@ async function populateMultiFieldCountsForStateV2(stateId, from, to) {
             },
           },
         ],
-        
+
         ShowcasedStartups: [
           {
             $match: {
@@ -1791,7 +1798,7 @@ async function populateMultiFieldCountsForCountry(from, to) {
           { $match: { dpiitCertified: { $eq: true } } },
           { $group: groupQuery },
         ],
-       
+
         ShowcasedStartups: [
           { $match: { showcased: { $eq: true } } },
           { $group: groupQuery },
@@ -1817,7 +1824,6 @@ async function populateMultiFieldCountsForCountry(from, to) {
         DpiitCertified: ["$DpiitCertified"],
         ShowcasedStartups: ["$ShowcasedStartups"],
         PatentStartup: ["$PatentStartup"],
-      
       },
     },
   ];
