@@ -8,15 +8,15 @@ router.get("/industryInsights", async (req, resp) => {
   //This Api returns insights i.e. industry wise counts and their percentages
   let stateId='';
   if (!_.isEmpty(req.query.stateId)) {
-    stateId=req.query.stateId;
+    stateId=ObjectId(req.query.stateId);
   }
-  let totalCount = await getTotalCount(stateId);
+  // let totalCount = await getTotalCount(stateId);
   let industryWiseCounts = await getIndustryWiseCounts(stateId);
  
   let output=[];
   industryWiseCounts.forEach(e => {
-      let percentage = (totalCount)? (e.count*100/totalCount).toFixed(2):0;
-      output.push({"industry":e._id, "count": e.count, "percentage":percentage});
+      // let percentage = (totalCount)? (e.count*100/totalCount).toFixed(2):0;
+      output.push({"industry":e._id, "count": e.count, "percentage":0});
   });
   resp.send((output));
 });
