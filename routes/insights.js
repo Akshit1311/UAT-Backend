@@ -9,7 +9,7 @@ router.get("/industryInsights", async (req, resp) => {
   //This Api returns insights i.e. industry wise counts and their percentages
   let stateId = "";
   if (!_.isEmpty(req.query.stateId)) {
-    stateId = req.query.stateId;
+    stateId = new ObjectId(req.query.stateId);
   }
   // let totalCount = await getTotalCount(stateId);
   let industryWiseCounts = await getIndustryWiseCounts(stateId);
@@ -28,7 +28,7 @@ router.get("/industryInsights", async (req, resp) => {
 router.get("/sectorInsights", async (req, resp) => {
   let stateId = "";
   if (!_.isEmpty(req.query.stateId)) {
-    stateId = req.query.stateId;
+    stateId = new ObjectId(req.query.stateId);
   }
   // let totalSectorCount = await getTotalSectorCount(stateId);
   let sectorWiseCounts = await getSectorWiseCounts(stateId);
@@ -54,7 +54,6 @@ router.get("/stageInsights", async (req, resp) => {
 
   // let totalStageCount = await getTotalStageCount(stateId);
   let stageWiseCounts = await getStageWiseCounts(stateId);
-  console.log(JSON.stringify(getStageWiseCounts));
   let output = [];
   stageWiseCounts.forEach((e) => {
     // let percentage = totalStageCount
