@@ -48,12 +48,12 @@ router.get("/stageInsights", async (req, resp) => {
   //This Api returns insights i.e. sector wise counts and their percentages
   let stateId = "";
   if (!_.isEmpty(req.query.stateId)) {
-    stateId = ObjectId(req.query.stateId);
+    stateId = req.query.stateId;
   }
 
   // let totalStageCount = await getTotalStageCount(stateId);
   let stageWiseCounts = await getStageWiseCounts(stateId);
-
+  console.log(JSON.stringify(getStageWiseCounts));
   let output = [];
   stageWiseCounts.forEach((e) => {
     // let percentage = totalStageCount
