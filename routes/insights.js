@@ -3,6 +3,7 @@ const router = express.Router();
 const request = require("request");
 const mongodb = require("../mongodb");
 const _ = require("lodash");
+const ObjectId = require("mongodb").ObjectId;
 
 router.get("/industryInsights", async (req, resp) => {
   //This Api returns insights i.e. industry wise counts and their percentages
