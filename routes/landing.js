@@ -24,10 +24,10 @@ blankFilterQuery = JSON.parse(blankFilterQuery);
 const startupTypeKeywordMap = {
   1: "dpiitCertified",
   2: "showcased",
-  4: "seedFunded",
-  5: "patented",
-  6: "womenOwned",
-  7: "leadingSector",
+  5: "seedFunded",
+  6: "patented",
+  7: "womenOwned",
+  8: "leadingSector",
 };
 
 // Get by date range
@@ -872,10 +872,10 @@ router.get("/startupCount/:type", async (req, resp) => {
       break;
     case "1":
     case "2":
-    case "4":
     case "5":
     case "6":
     case "7":
+    case "8":
       searchObj[startupTypeKeywordMap[type]] = true;
       break;
   }

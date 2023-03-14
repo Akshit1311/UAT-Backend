@@ -25,7 +25,7 @@ const startupTypes = [
   "seedFunded",
   "patented",
   "womenOwned",
-  " Sector",
+  "leadingSector",
 ];
 
 //Get top numbers POST API
