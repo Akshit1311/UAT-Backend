@@ -24,10 +24,10 @@ blankFilterQuery = JSON.parse(blankFilterQuery);
 const startupTypeKeywordMap = {
   1: "dpiitCertified",
   2: "showcased",
-  5: "seedFunded",
-  6: "patented",
-  7: "womenOwned",
-  8: "leadingSector",
+  3: "seedFunded",
+  4: "patented",
+  5: "womenOwned",
+  6: "leadingSector",
 };
 
 // Get by date range
