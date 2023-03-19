@@ -252,7 +252,7 @@ router.post("/startupCounts/:startupType", async (req, resp) => {
 
 router.post("/leadingSector", async (req, resp) => {
   //Array to accept variable parameters e.g. stateId, industries, sectors, from and to dates
-  const acceptedParams = ["country", "role"];
+  const acceptedParams = ["role"];
   const states = [];
   const industries = [];
   const sectors = [];
@@ -280,7 +280,7 @@ router.post("/leadingSector", async (req, resp) => {
 
   //Building default body set for building final queries based on input parameters
   const obj = {
-    country: { countryName: "India" },
+    // country: { countryName: "India" },
     role: { role: "Startup" },
     profileRegisteredOn: { profileRegisteredOn: { $gte: from, $lte: to } },
     states: { stateId: state },
@@ -313,6 +313,7 @@ async function getSectorCounts(matchQuery = "") {
     },
     { $sort: { count: -1 } },
   ];
+  // console.log(JSON.stringify(querySectorwiseCount));
   var prom = new Promise((resolve, rej) => {
     try {
       mongodb
