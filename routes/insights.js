@@ -67,9 +67,9 @@ router.get("/stageInsights", async (req, resp) => {
 });
 
 async function getTotalCount(stateId = "") {
-  let matchQuery = { "industry.name": { $ne: "" } };
+  let matchQuery = { role: "Startup", dpiitCertified:true, "industry.name": { $ne: "" } };
   if (stateId != "") {
-    matchQuery = { stateId: { $eq: stateId }, "industry.name": { $ne: "" } };
+    matchQuery = { role: "Startup", dpiitCertified:true, stateId: { $eq: stateId }, "industry.name": { $ne: "" } };
   }
   const queryTotalIndCount = [
     { $unwind: { path: "$industry" } },
@@ -103,9 +103,9 @@ async function getTotalCount(stateId = "") {
 }
 
 async function getTotalSectorCount(stateId = "") {
-  let matchQuery = { "sector.name": { $ne: "" } };
+  let matchQuery = { role: "Startup", dpiitCertified:true, "sector.name": { $ne: "" } };
   if (stateId != "") {
-    matchQuery = { stateId: { $eq: stateId }, "sector.name": { $ne: "" } };
+    matchQuery = { role: "Startup", dpiitCertified:true, stateId: { $eq: stateId }, "sector.name": { $ne: "" } };
   }
   const queryTotalSectorCount = [
     { $unwind: { path: "$sector" } },
@@ -140,9 +140,9 @@ async function getTotalSectorCount(stateId = "") {
 
 async function getTotalStageCount(stateId = "") {
   if (stateId != "") {
-    matchQuery = { stateId: stateId, role: "Startup", stage: { $ne: null } };
+    matchQuery = { role: "Startup", dpiitCertified:true,stateId: stateId, stage: { $ne: null } };
   } else {
-    matchQuery = { role: "Startup", stage: { $ne: null } };
+    matchQuery = { role: "Startup", dpiitCertified:true, stage: { $ne: null } };
   }
 
   const queryTotalStageCount = [
@@ -176,9 +176,10 @@ async function getTotalStageCount(stateId = "") {
 }
 
 async function getIndustryWiseCounts(stateId = "") {
-  let matchQuery = { "industry.name": { $exists: true } };
+  let matchQuery = { role: "Startup", dpiitCertified:true,"industry.name": { $exists: true } };
   if (stateId != "") {
     matchQuery = {
+      role: "Startup", dpiitCertified:true,
       stateId: stateId,
       "industry.name": { $exists: true },
     };
@@ -216,9 +217,9 @@ async function getIndustryWiseCounts(stateId = "") {
 }
 
 async function getSectorWiseCounts(stateId = "") {
-  let matchQuery = { role: "Startup" };
+  let matchQuery = { role: "Startup", dpiitCertified:true };
   if (stateId != "") {
-    matchQuery = { stateId: stateId, role: "Startup" };
+    matchQuery = { role: "Startup", dpiitCertified:true, stateId: stateId };
   }
   const querySectorwiseCount = [
     { $unwind: { path: "$sector" } },
@@ -253,9 +254,9 @@ async function getSectorWiseCounts(stateId = "") {
 }
 
 async function getStageWiseCounts(stateId = "") {
-  let matchQuery = { role: "Startup" };
+  let matchQuery = { role: "Startup" , dpiitCertified:true};
   if (stateId != "") {
-    matchQuery = { stateId: stateId, role: "Startup" };
+    matchQuery = { role: "Startup", dpiitCertified:true, stateId: stateId};
   }
 
   const queryStagewiseCount = [
